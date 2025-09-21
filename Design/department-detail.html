@@ -114,54 +114,64 @@
                     </div>
                     <div class="faculty-grid" id="facultyContainer">
                         <!-- Faculty will be loaded dynamically -->
+                        <!-- Example faculty card with rating UI -->
+                        <!-- This will be generated dynamically by JS for each teacher -->
+                        <!--
+                        <div class="faculty-card">
+                            <div class="faculty-image">
+                                <img src="https://placehold.co/80x80/3b82f6/FFFFFF?text=Dr.+A" alt="Faculty" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                            </div>
+                            <div class="faculty-info">
+                                <h4>Dr. John Doe</h4>
+                                <p>Assistant Professor</p>
+                                <p class="faculty-specialization">Data Science</p>
+                                <div class="faculty-rating">
+                                    <div class="rating-stars">
+                                        &#9733;&#9733;&#9733;&#9733;&#9734;
+                                    </div>
+                                    <span class="rating-number">4.2</span>
+                                    <span class="rating-count">(87 reviews)</span>
+                                </div>
+                                <button class="rate-teacher-btn btn-primary" data-teacher-id="123">Rate Teacher</button>
+                            </div>
+                        </div>
+                        -->
                     </div>
                 </div>
 
-                <!-- Rate Teacher Modal -->
-                <div id="rateTeacherModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>Rate Teacher</h3>
-                            <span class="close">&times;</span>
-                        </div>
-                        <div class="modal-body">
-                            <div class="teacher-info">
-                                <img id="modalTeacherImage" src="" alt="Teacher" class="modal-teacher-image">
-                                <div>
-                                    <h4 id="modalTeacherName"></h4>
-                                    <p id="modalTeacherTitle"></p>
-                                </div>
-                            </div>
-                            <form id="rateTeacherForm">
-                                <div class="rating-section">
-                                    <label>Overall Rating:</label>
-                                    <div class="star-rating">
-                                        <input type="radio" id="star1" name="rating" value="1">
-                                        <label for="star1" class="star" data-rating="1">★</label>
-                                        <input type="radio" id="star2" name="rating" value="2">
-                                        <label for="star2" class="star" data-rating="2">★</label>
-                                        <input type="radio" id="star3" name="rating" value="3">
-                                        <label for="star3" class="star" data-rating="3">★</label>
-                                        <input type="radio" id="star4" name="rating" value="4">
-                                        <label for="star4" class="star" data-rating="4">★</label>
-                                        <input type="radio" id="star5" name="rating" value="5">
-                                        <label for="star5" class="star" data-rating="5">★</label>
-                                    </div>
-                                </div>
-                                <div class="modal-actions">
-                                    <button type="button" class="btn btn-secondary" id="cancelRate">Cancel</button>
-                                    <button type="submit" class="btn btn-primary">Submit Rating</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </section>
     </main>
 
     <!-- FOOTER COMPONENT -->
     <div id="footer-container"></div>
+
+    <!-- Teacher Rating Modal -->
+    <div id="teacherRatingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Rate Teacher</h3>
+                <span class="close" id="closeTeacherModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="rating-section">
+                    <label for="teacherModalStars">Your Rating</label>
+                    <div class="star-rating" id="teacherModalStars">
+                        <label data-star="1">&#9734;</label>
+                        <label data-star="2">&#9734;</label>
+                        <label data-star="3">&#9734;</label>
+                        <label data-star="4">&#9734;</label>
+                        <label data-star="5">&#9734;</label>
+                    </div>
+                    <input type="hidden" id="teacherModalSelectedStars" value="0">
+                </div>
+                <div class="modal-actions">
+                    <button id="submitTeacherRating" class="btn btn-primary">Submit Rating</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- JAVASCRIPT -->
     <script>
@@ -171,59 +181,6 @@
             
             // Load footer component
             $('#footer-container').load('footer.html');
-
-            // Close modal handlers
-            $(document).on('click', '#cancelRate, #rateTeacherModal .close', function() {
-                $('#rateTeacherModal').hide();
-                $('.star-rating label').removeClass('active');
-                $('.star-rating input[type="radio"]').prop('checked', false);
-            });
-
-            // Close when clicking outside content
-            $(window).on('click', function(e) {
-                if (e.target.id === 'rateTeacherModal') {
-                    $('#rateTeacherModal').hide();
-                    $('.star-rating label').removeClass('active');
-                    $('.star-rating input[type="radio"]').prop('checked', false);
-                }
-            });
-
-            // Star rating interaction (left-to-right sequential)
-            $(document).on('click', '#rateTeacherModal .star', function(e) {
-                e.preventDefault();
-                const clickedRating = Number($(this).data('rating'));
-                const starContainer = $(this).closest('.star-rating');
-
-                let currentMax = 0;
-                starContainer.find('label').each(function() {
-                    const r = Number($(this).data('rating'));
-                    if ($(this).hasClass('active')) currentMax = Math.max(currentMax, r);
-                });
-
-                const renderTo = (newMax) => {
-                    starContainer.find('label').each(function() {
-                        const r = Number($(this).data('rating'));
-                        if (r <= newMax) $(this).addClass('active'); else $(this).removeClass('active');
-                    });
-                    if (newMax > 0) starContainer.find(`input[value="${newMax}"]`).prop('checked', true);
-                    else starContainer.find('input[type="radio"]').prop('checked', false);
-                };
-
-                if (clickedRating === currentMax + 1) { renderTo(clickedRating); return; }
-                if (clickedRating === currentMax) { renderTo(currentMax - 1); return; }
-                // ignore non-consecutive
-            });
-
-            // Submit rating
-            $('#rateTeacherForm').on('submit', function(e) {
-                e.preventDefault();
-                const rating = $('input[name="rating"]:checked', this).val();
-                if (!rating) { alert('Please select a rating'); return; }
-               
-                $('#rateTeacherModal').hide();
-                this.reset();
-                $('.star-rating label').removeClass('active');
-            });
         });
     </script>
     <script src="department-detail.js"></script>
