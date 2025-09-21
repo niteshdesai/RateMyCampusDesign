@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate My Campus - Department Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="college.css">
+    <link rel="stylesheet" href="department-detail.css">
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar-container"></div>
+    
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- DEPARTMENT DETAIL SECTION -->
+        <section class="department-detail-section">
+            <!-- Department Header -->
+            <div class="department-header">
+                <div class="department-hero">
+                    <img src="https://placehold.co/1200x300/3b82f6/FFFFFF?text=Computer+Science+Department" alt="Department Building" class="department-hero-image">
+                    <div class="department-hero-overlay">
+                        <div class="department-basic-info">
+                            <h1 class="department-name">Computer Science</h1>
+                            <!-- Removed college description from header -->
+                            <div class="department-stats">
+                                <div class="stat-item">
+                                    <span class="stat-number">500+</span>
+                                    <span class="stat-label">Students</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">25</span>
+                                    <span class="stat-label">Faculty</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">15</span>
+                                    <span class="stat-label">Courses</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Department Content -->
+            <div class="department-content">
+                <div class="department-info-grid">
+                    <!-- Left Column - Main Info -->
+                    <div class="department-main-info">
+                        <!-- Department Description -->
+                        <div class="info-card">
+                            <h2><i class="fas fa-info-circle"></i> About Department</h2>
+                            <p class="department-full-description">
+                                <!-- Only department description will be shown here, dynamically populated by JS -->
+                            </p>
+                        </div>
+
+                        <!-- Courses Section -->
+                        <div class="info-card">
+                            <h2><i class="fas fa-book"></i> Courses Offered</h2>
+                            <div class="courses-table-container">
+                                <table class="courses-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course Name</th>
+                                            <th>Duration</th>
+                                            <th>Since</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="coursesTableBody">
+                                        <!-- Courses will be loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Quick Info -->
+                    <div class="department-sidebar">
+                        <!-- Department Head -->
+                        <div class="info-card sidebar-card">
+                            <h3><i class="fas fa-user-tie"></i> Department Head</h3>
+                            <div class="faculty-card horizontal-card">
+                                <div class="faculty-image">
+                                    <img src="https://placehold.co/80x80/3b82f6/FFFFFF?text=Dr.+A" alt="Department Head" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                                </div>
+                                <div class="faculty-info">
+                                    <h4>Dr. Sarah Johnson</h4>
+                                    <p>Professor & Head of Department</p>
+                                    <p class="faculty-specialization">Artificial Intelligence & Machine Learning</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faculty Section -->
+                <div class="faculty-section">
+                    <h2><i class="fas fa-chalkboard-teacher"></i> Faculty Members by Course</h2>
+                    <div class="faculty-tabs">
+                        <button class="faculty-tab active" data-course="all">All Faculty</button>
+                        <button class="faculty-tab" data-course="mca">MCA Teachers</button>
+                        <button class="faculty-tab" data-course="bca">BCA Teachers</button>
+                        <button class="faculty-tab" data-course="mtech">M.Tech CS Teachers</button>
+                        <button class="faculty-tab" data-course="btech">B.Tech CS Teachers</button>
+                        <button class="faculty-tab" data-course="diploma">Diploma CS Teachers</button>
+                    </div>
+                    <div class="faculty-grid" id="facultyContainer">
+                        <!-- Faculty will be loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Rate Teacher Modal -->
+                <div id="rateTeacherModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Rate Teacher</h3>
+                            <span class="close">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <div class="teacher-info">
+                                <img id="modalTeacherImage" src="" alt="Teacher" class="modal-teacher-image">
+                                <div>
+                                    <h4 id="modalTeacherName"></h4>
+                                    <p id="modalTeacherTitle"></p>
+                                </div>
+                            </div>
+                            <form id="rateTeacherForm">
+                                <div class="rating-section">
+                                    <label>Overall Rating:</label>
+                                    <div class="star-rating">
+                                        <input type="radio" id="star1" name="rating" value="1">
+                                        <label for="star1" class="star" data-rating="1">★</label>
+                                        <input type="radio" id="star2" name="rating" value="2">
+                                        <label for="star2" class="star" data-rating="2">★</label>
+                                        <input type="radio" id="star3" name="rating" value="3">
+                                        <label for="star3" class="star" data-rating="3">★</label>
+                                        <input type="radio" id="star4" name="rating" value="4">
+                                        <label for="star4" class="star" data-rating="4">★</label>
+                                        <input type="radio" id="star5" name="rating" value="5">
+                                        <label for="star5" class="star" data-rating="5">★</label>
+                                    </div>
+                                </div>
+                                <div class="modal-actions">
+                                    <button type="button" class="btn btn-secondary" id="cancelRate">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Submit Rating</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER COMPONENT -->
+    <div id="footer-container"></div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        $(document).ready(function() {
+            // Load navbar component
+            $('#navbar-container').load('navbar.html');
+            
+            // Load footer component
+            $('#footer-container').load('footer.html');
+
+            // Close modal handlers
+            $(document).on('click', '#cancelRate, #rateTeacherModal .close', function() {
+                $('#rateTeacherModal').hide();
+                $('.star-rating label').removeClass('active');
+                $('.star-rating input[type="radio"]').prop('checked', false);
+            });
+
+            // Close when clicking outside content
+            $(window).on('click', function(e) {
+                if (e.target.id === 'rateTeacherModal') {
+                    $('#rateTeacherModal').hide();
+                    $('.star-rating label').removeClass('active');
+                    $('.star-rating input[type="radio"]').prop('checked', false);
+                }
+            });
+
+            // Star rating interaction (left-to-right sequential)
+            $(document).on('click', '#rateTeacherModal .star', function(e) {
+                e.preventDefault();
+                const clickedRating = Number($(this).data('rating'));
+                const starContainer = $(this).closest('.star-rating');
+
+                let currentMax = 0;
+                starContainer.find('label').each(function() {
+                    const r = Number($(this).data('rating'));
+                    if ($(this).hasClass('active')) currentMax = Math.max(currentMax, r);
+                });
+
+                const renderTo = (newMax) => {
+                    starContainer.find('label').each(function() {
+                        const r = Number($(this).data('rating'));
+                        if (r <= newMax) $(this).addClass('active'); else $(this).removeClass('active');
+                    });
+                    if (newMax > 0) starContainer.find(`input[value="${newMax}"]`).prop('checked', true);
+                    else starContainer.find('input[type="radio"]').prop('checked', false);
+                };
+
+                if (clickedRating === currentMax + 1) { renderTo(clickedRating); return; }
+                if (clickedRating === currentMax) { renderTo(currentMax - 1); return; }
+                // ignore non-consecutive
+            });
+
+            // Submit rating
+            $('#rateTeacherForm').on('submit', function(e) {
+                e.preventDefault();
+                const rating = $('input[name="rating"]:checked', this).val();
+                if (!rating) { alert('Please select a rating'); return; }
+               
+                $('#rateTeacherModal').hide();
+                this.reset();
+                $('.star-rating label').removeClass('active');
+            });
+        });
+    </script>
+    <script src="department-detail.js"></script>
+</body>
+</html>

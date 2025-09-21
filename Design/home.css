@@ -1,0 +1,256 @@
+/*
+====================
+HOMEPAGE STYLES
+====================
+*/
+
+/* Hero Section with Abstract Background */
+.hero {
+    position: relative;
+    background: linear-gradient(135deg, var(--light-blue-bg), #fff);
+    text-align: center;
+    padding: 6rem 1rem;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    margin: 2rem auto;
+    max-width: 1200px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Abstract Background Shapes */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(249, 115, 22, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+    z-index: 1;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(45deg, transparent 30%, rgba(59, 130, 246, 0.03) 50%, transparent 70%),
+        linear-gradient(-45deg, transparent 30%, rgba(249, 115, 22, 0.03) 50%, transparent 70%);
+    z-index: 1;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, -30px) rotate(120deg); }
+    66% { transform: translate(-20px, 20px) rotate(240deg); }
+}
+
+/* Education-themed 3D Elements */
+.hero .education-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.hero .education-elements::before {
+    content: '🎓';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    font-size: 3rem;
+    opacity: 0.1;
+    animation: bounce 3s ease-in-out infinite;
+}
+
+.hero .education-elements::after {
+    content: '📚';
+    position: absolute;
+    top: 20%;
+    right: 15%;
+    font-size: 2.5rem;
+    opacity: 0.1;
+    animation: bounce 3s ease-in-out infinite 1s;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.1); }
+}
+
+/* Hero Content */
+.hero-content {
+    position: relative;
+    z-index: 3;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, var(--text-color), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeInUp 1s ease-out;
+}
+
+.hero .tagline {
+    font-size: 1.25rem;
+    color: var(--dark-gray);
+    margin-bottom: 2rem;
+    animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+/* Search Bar */
+.search-bar {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+.search-bar input {
+    flex-grow: 1;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--light-gray);
+    border-radius: var(--border-radius-xl);
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--orange);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.2), 0 0 20px rgba(249, 115, 22, 0.3);
+    transform: translateY(-2px);
+}
+
+.search-bar .btn {
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Featured Colleges Section */
+.featured-colleges {
+    margin-top: 4rem;
+    padding: 2rem 0;
+}
+
+.featured-colleges h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--text-color);
+    background: linear-gradient(135deg, var(--text-color), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+}
+
+.featured-colleges h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(135deg, var(--blue), var(--orange));
+    border-radius: 2px;
+}
+
+.featured-colleges .card-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    margin-bottom: 3rem;
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero {
+        padding: 4rem 1rem;
+        margin: 1rem;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero .tagline {
+        font-size: 1rem;
+    }
+
+    .search-bar {
+        flex-direction: column;
+    }
+
+    .search-bar .btn {
+        width: 100%;
+    }
+
+    .hero .education-elements::before,
+    .hero .education-elements::after {
+        font-size: 2rem;
+    }
+
+    .featured-colleges h2 {
+        font-size: 2rem;
+    }
+
+    .featured-colleges .card-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 1.75rem;
+    }
+    
+    .hero .tagline {
+        font-size: 0.9rem;
+    }
+
+    .featured-colleges h2 {
+        font-size: 1.75rem;
+    }
+
+    .featured-colleges .card-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}

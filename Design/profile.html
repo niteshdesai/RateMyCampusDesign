@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate My Campus - Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for social media icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="profile.css">
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="api.js"></script>
+</head>
+<body>
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar-container"></div>
+    
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- PROFILE SECTION -->
+        <section id="profile" class="profile-section">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <img id="profileAvatar" class="avatar" src="https://placehold.co/160x160/3b82f6/ffffff?text=User" alt="Avatar">
+                    <div>
+                        <div class="profile-name" id="profileName">User Name</div>
+                        <div class="role-badge" id="roleBadge"><i class="fas fa-user-graduate"></i><span>Student</span></div>
+                    </div>
+                </div>
+
+                <div class="profile-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-id-card"></i> Profile Details</h3>
+                        <div id="detailsGrid" class="details-grid"></div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-cog"></i> Actions</h3>
+                        <div class="actions">
+                            <button id="logoutBtn" class="btn btn-secondary btn-logout">Log Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER COMPONENT -->
+    <div id="footer-container"></div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        $(document).ready(function() {
+            // Load navbar component
+            $('#navbar-container').load('navbar.html');
+            
+            // Load footer component
+            $('#footer-container').load('footer.html');
+
+            // Populate profile based on role from localStorage
+            function renderProfile() {
+                var user = JSON.parse(localStorage.getItem('rmc_user') || '{}');
+                var role = user.role || 'student';
+                var name = user.name || (role === 'student' ? 'Student User' : role === 'admin' ? 'College Admin' : 'Department Admin');
+                var avatar = user.avatar || 'https://placehold.co/160x160/3b82f6/ffffff?text=User';
+
+                $('#profileName').text(name);
+                $('#profileAvatar').attr('src', avatar);
+
+                var roleIcon = role === 'student' ? 'fa-user-graduate' : role === 'admin' ? 'fa-shield' : 'fa-user-tie';
+                var roleTitle = role === 'student' ? 'Student' : role === 'admin' ? 'College Admin' : 'Department Admin';
+                $('#roleBadge').html(`<i class="fas ${roleIcon}"></i><span>${roleTitle}</span>`);
+
+                if (role === 'student') {
+                    // Show loading state
+                    var $grid = $('#detailsGrid').empty();
+                    $grid.html('<div class="loading-spinner"></div><p class="text-center">Loading student details...</p>');
+                    
+                    // Fetch student details from database
+                    if (user.enrollment) {
+                        API.getStudentProfile(user.enrollment)
+                            .done(function(studentData) {
+                                // Update the profile with data from database
+                                renderStudentDetails(studentData);
+                            })
+                            .fail(function(xhr) {
+                                console.error('Failed to fetch student details:', xhr);
+                                // Fallback to localStorage data if API fails
+                                renderStudentDetailsFromLocalStorage(user);
+                            });
+                    } else {
+                        // Fallback if no enrollment number
+                        renderStudentDetailsFromLocalStorage(user);
+                    }
+                } else if (role === 'admin') {
+                    var details = [
+                        { label: 'Name', value: name },
+                        { label: 'Email', value: user.email || '—' },
+                        { label: 'Mobile Number', value: user.mobile || '—' }
+                    ];
+                    renderDetailsGrid(details);
+                } else {
+                    var details = [
+                        { label: 'Name', value: name },
+                        { label: 'Email', value: user.email || '—' }
+                    ];
+                    renderDetailsGrid(details);
+                }
+            }
+            
+            // Render student details from API data
+            function renderStudentDetails(studentData) {
+                var details = [
+                    { label: 'Enrollment Number', value: studentData.enrollment || '—' },
+                    { label: 'Name', value: studentData.name || '—' },
+                    { label: 'Semester', value: studentData.semester || '—' },
+                    { label: 'Gender', value: studentData.gender || '—' },
+                    { label: 'City', value: studentData.city || '—' },
+                    { label: 'Email', value: studentData.email || '—' },
+                    { label: 'Mobile Number', value: studentData.mobile || '—' }
+                ];
+                
+                // Update profile name if available
+                if (studentData.name) {
+                    $('#profileName').text(studentData.name);
+                }
+                
+                renderDetailsGrid(details);
+            }
+            
+            // Fallback to render student details from localStorage
+            function renderStudentDetailsFromLocalStorage(user) {
+                var details = [
+                    { label: 'Enrollment Number', value: user.enrollment || '—' },
+                    { label: 'Name', value: user.name || 'Student User' },
+                    { label: 'Semester', value: user.semester || '—' },
+                    { label: 'Gender', value: user.gender || '—' },
+                    { label: 'City', value: user.city || '—' },
+                    { label: 'Email', value: user.email || '—' },
+                    { label: 'Mobile Number', value: user.mobile || '—' }
+                ];
+                renderDetailsGrid(details);
+            }
+            
+            // Helper function to render details grid
+            function renderDetailsGrid(details) {
+                var $grid = $('#detailsGrid').empty();
+                $.each(details, function(_, d) {
+                    $grid.append(`
+                        <div class="detail">
+                            <label>${d.label}</label>
+                            <div class="value">${d.value}</div>
+                        </div>
+                    `);
+                });
+            }
+
+            renderProfile();
+
+            // Logout
+            $('#logoutBtn').on('click', function() {
+                var $btn = $(this);
+                $btn.addClass('loading').prop('disabled', true);
+                setTimeout(function() {
+                    localStorage.removeItem('rmc_user');
+                    window.location.href = 'login.html';
+                }, 600);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+LOGO PLACEHOLDER FILE
+
+To use your custom logo:
+
+1. Create a folder named "assets" in your project directory
+2. Add your logo image file (PNG, JPG, or SVG) to the assets folder
+3. Name it "logo.png" (or update the src path in demo.html)
+4. Recommended logo specifications:
+   - Size: 40x40 pixels (will scale automatically)
+   - Format: PNG with transparent background (preferred)
+   - Style: Should match your blue/orange theme
+   - Content: Building, star, shield, or university-themed design
+
+Current path in HTML: src="assets/logo.png"
+
+If you want to use a different filename or format, update line 24 in demo.html:
+<img src="assets/your-logo-name.png" alt="Rate My Campus Logo" class="logo-image">

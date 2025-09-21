@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate My Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for social media icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="college.css">
+    <link rel="stylesheet" href="login.css">
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+</head>
+<body>
+
+    <!-- NAV BAR -->
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <img src="assets/logo4.png" alt="Rate My Campus Logo" class="logo-image">
+            <span class="logo-text">Rate My Campus</span>
+        </a>
+        <div class="hamburger-menu" id="hamburger-menu">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="navbar-links" id="navbarLinks">
+            <a href="#home" class="nav-link">Home</a>
+            <a href="#colleges" class="nav-link">Colleges</a>
+            <a href="#login" class="nav-link login-btn" id="authLink">Login</a>
+        </div>
+    </nav>
+    
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- HOME SECTION -->
+        <section id="home">
+            <div class="hero">
+                <div class="education-elements"></div>
+                <div class="hero-content">
+                    <h1>Find Your Perfect University</h1>
+                <p class="tagline">Explore ratings, reviews, and detailed information about colleges and professors.</p>
+                <div class="search-bar">
+                    <input type="text" placeholder="Search for colleges or teachers...">
+                    <a href="#" class="btn btn-primary">Search</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Featured Colleges Section -->
+            <div class="featured-colleges">
+                <h2>Featured Colleges</h2>
+                <div class="card-grid">
+                    <!-- Featured College Card 1 -->
+                    <div class="card" data-category="university">
+                        <img src="https://placehold.co/600x400/3b82f6/FFFFFF?text=University" alt="University Campus" class="card-image">
+                        <div class="card-content">
+                            <h3>State University</h3>
+                            <p class="card-description">A prestigious public research university known for its excellent programs in engineering and business.</p>
+                            <div class="card-rating">
+                                <span class="rating-stars">★★★★★</span>
+                                <span class="rating-number">4.8</span>
+                                <span class="rating-count">(1,234 reviews)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Featured College Card 2 -->
+                    <div class="card" data-category="college">
+                        <img src="https://placehold.co/600x400/f97316/FFFFFF?text=College" alt="College Campus" class="card-image">
+                        <div class="card-content">
+                            <h3>City College</h3>
+                            <p class="card-description">A vibrant community college offering diverse programs and excellent student support services.</p>
+                            <div class="card-rating">
+                                <span class="rating-stars">★★★★☆</span>
+                                <span class="rating-number">4.2</span>
+                                <span class="rating-count">(856 reviews)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Featured College Card 3 -->
+                    <div class="card" data-category="institute">
+                        <img src="https://placehold.co/600x400/3b82f6/FFFFFF?text=Institute" alt="Institute Building" class="card-image">
+                        <div class="card-content">
+                            <h3>Tech Institute</h3>
+                            <p class="card-description">Leading technology institute specializing in computer science and innovation.</p>
+                            <div class="card-rating">
+                                <span class="rating-stars">★★★☆☆</span>
+                                <span class="rating-number">3.5</span>
+                                <span class="rating-count">(432 reviews)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COLLEGES SECTION -->
+        <section id="colleges" class="college-section" style="display: none;">
+            <h2>All Colleges</h2>
+            
+            <div class="card-grid">
+                <!-- Sample College Card 1 -->
+                <div class="card" data-category="university">
+                    <img src="https://placehold.co/600x400/3b82f6/FFFFFF?text=University" alt="University Campus" class="card-image">
+                    <div class="card-content">
+                        <h3>State University</h3>
+                        <p class="card-description">A prestigious public research university known for its excellent programs in engineering and business.</p>
+                        <div class="card-rating">
+                            <span class="rating-stars">★★★★★</span>
+                            <span class="rating-number">4.8</span>
+                            <span class="rating-count">(1,234 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sample College Card 2 -->
+                <div class="card" data-category="college">
+                    <img src="https://placehold.co/600x400/f97316/FFFFFF?text=College" alt="College Campus" class="card-image">
+                    <div class="card-content">
+                        <h3>City College</h3>
+                        <p class="card-description">A vibrant community college offering diverse programs and excellent student support services.</p>
+                        <div class="card-rating">
+                            <span class="rating-stars">★★★★☆</span>
+                            <span class="rating-number">4.2</span>
+                            <span class="rating-count">(856 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sample College Card 3 -->
+                <div class="card" data-category="institute">
+                    <img src="https://placehold.co/600x400/3b82f6/FFFFFF?text=Institute" alt="Institute Building" class="card-image">
+                    <div class="card-content">
+                        <h3>Tech Institute</h3>
+                        <p class="card-description">Leading technology institute specializing in computer science and innovation.</p>
+                        <div class="card-rating">
+                            <span class="rating-stars">★★★☆☆</span>
+                            <span class="rating-number">3.5</span>
+                            <span class="rating-count">(432 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sample College Card 4 -->
+                <div class="card" data-category="academy">
+                    <img src="https://placehold.co/600x400/f97316/FFFFFF?text=Academy" alt="Academy Library" class="card-image">
+                    <div class="card-content">
+                        <h3>Arts Academy</h3>
+                        <p class="card-description">Premier arts academy fostering creativity and artistic excellence in all disciplines.</p>
+                        <div class="card-rating">
+                            <span class="rating-stars">★★★★☆</span>
+                            <span class="rating-number">4.0</span>
+                            <span class="rating-count">(678 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sample College Card 5 -->
+                <div class="card" data-category="university">
+                    <img src="https://placehold.co/600x400/3b82f6/FFFFFF?text=Medical" alt="Medical School" class="card-image">
+                    <div class="card-content">
+                        <h3>Medical University</h3>
+                        <p class="card-description">Top-ranked medical university with world-class facilities and renowned faculty.</p>
+                        <div class="card-rating">
+                            <span class="rating-stars">★★★★★</span>
+                            <span class="rating-number">4.9</span>
+                            <span class="rating-count">(2,156 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sample College Card 6 -->
+                <div class="card" data-category="college">
+                    <img src="https://placehold.co/600x400/f97316/FFFFFF?text=Liberal" alt="Liberal Arts College" class="card-image">
+                    <div class="card-content">
+                        <h3>Liberal Arts College</h3>
+                        <p class="card-description">Small liberal arts college providing personalized education and close faculty-student relationships.</p>
+                        <div class="card-rating">
+                            <span class="rating-stars">★★★★☆</span>
+                            <span class="rating-number">4.3</span>
+                            <span class="rating-count">(543 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOGIN SECTION -->
+        <section id="login" class="login-section" style="display: none;">
+            <div class="form-container">
+                <h2>Login</h2>
+                
+                <!-- Login Tabs -->
+                <div class="login-tabs">
+                    <div class="tab active" data-tab="student">Student</div>
+                    <div class="tab" data-tab="hod">HOD</div>
+                    <div class="tab" data-tab="admin">College Admin</div>
+                </div>
+
+                <!-- Student Login Form -->
+                <form id="studentForm" class="login-form active">
+                    <div class="form-group">
+                        <label for="enrollment">Enrollment Number</label>
+                        <input type="text" id="enrollment" name="enrollment" placeholder="Enter your enrollment number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="semester">Semester</label>
+                        <input type="number" id="semester" name="semester" placeholder="Enter your semester" min="1" max="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="college">College</label>
+                        <select id="college" name="collegeId" required>
+                            <option value="">Select your college</option>
+                            <option value="1">Gujarat Vidyapith</option>
+                            <option value="2">PNU</option>
+                            <option value="3">State University</option>
+                            <option value="4">City College</option>
+                            <option value="5">Tech Institute</option>
+                            <option value="6">Arts Academy</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-secondary w-full">Login as Student</button>
+                </form>
+
+                <!-- HOD Login Form -->
+                <form id="hodForm" class="login-form">
+                    <div class="form-group">
+                        <label for="hodEmail">Email</label>
+                        <input type="email" id="hodEmail" name="email" placeholder="Enter your email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hodPassword">Password</label>
+                        <input type="password" id="hodPassword" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-secondary w-full">Login as HOD</button>
+                </form>
+
+                <!-- College Admin Login Form -->
+                <form id="adminForm" class="login-form">
+                    <div class="form-group">
+                        <label for="adminEmail">Email</label>
+                        <input type="email" id="adminEmail" name="email" placeholder="Enter your email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">Password</label>
+                        <input type="password" id="adminPassword" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-secondary w-full">Login as Admin</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- PROFILE SECTION (HIDDEN BY DEFAULT) -->
+        <section id="profile" class="profile-section" style="display: none;">
+            <div class="form-container">
+                <div class="profile-content">
+                    <h2>Welcome, Student!</h2>
+                    <p>You're successfully logged in to Rate My Campus. Explore colleges, read reviews, and share your own experiences to help other students make informed decisions.</p>
+                <button id="logoutBtn" class="btn btn-secondary w-full">Log Out</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Contact Us</h4>
+                <p>Email: info@ratemycampus.com</p>
+                <p>Phone: (123) 456-7890</p>
+            </div>
+            <div class="footer-column">
+                <h4>Follow Us</h4>
+                <div class="social-icons">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 Rate My Campus. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        $(document).ready(function() {
+            // Function to show a section and hide others with smooth animation
+            function showSection(sectionId) {
+                $('section').fadeOut(300, function() {
+                $(sectionId).fadeIn(500);
+                });
+            }
+
+            // Initially show the home section
+            showSection('#home');
+
+            // Navbar scroll effect
+            $(window).scroll(function() {
+                if ($(window).scrollTop() > 50) {
+                    $('.navbar').addClass('scrolled');
+                } else {
+                    $('.navbar').removeClass('scrolled');
+                }
+            });
+
+            // Handle hamburger menu toggle on mobile
+            $('#hamburger-menu').on('click', function() {
+                $('#navbarLinks').toggleClass('active');
+                $(this).toggleClass('active');
+            });
+
+            // Handle navigation clicks
+            $('.nav-link').on('click', function(e) {
+                e.preventDefault();
+                var targetId = $(this).attr('href');
+                showSection(targetId);
+                // Hide mobile menu after click
+                if ($('#navbarLinks').hasClass('active')) {
+                    $('#navbarLinks').removeClass('active');
+                    $('#hamburger-menu').removeClass('active');
+                }
+            });
+
+            // Smooth scroll for internal links
+            $('a[href*="#"]').not('[href="#"]').on('click', function(event) {
+                if (
+                    location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') 
+                    && 
+                    location.hostname == this.hostname
+                ) {
+                    var target = $(this.hash);
+                    target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+                    if (target.length) {
+                        event.preventDefault();
+                        $('html, body').animate({
+                            scrollTop: target.offset().top - 80
+                        }, 1000, 'easeInOutCubic');
+                    }
+                }
+            });
+
+            // Card hover effects
+            $('.card').hover(
+                function() {
+                    $(this).addClass('hovered');
+                },
+                function() {
+                    $(this).removeClass('hovered');
+                }
+            );
+
+
+            // Tab switching functionality
+            $('.tab').on('click', function() {
+                var tabId = $(this).data('tab');
+                
+                // Remove active class from all tabs and forms
+                $('.tab').removeClass('active');
+                $('.login-form').removeClass('active');
+                
+                // Add active class to clicked tab and corresponding form
+                $(this).addClass('active');
+                $('#' + tabId + 'Form').addClass('active');
+            });
+
+            // Enhanced login functionality for all forms
+            $('.login-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                var $btn = $(this).find('button[type="submit"]');
+                var $form = $(this);
+                var formId = $(this).attr('id');
+                var userType = formId.replace('Form', '');
+                
+                // Add loading state
+                $btn.addClass('loading').prop('disabled', true);
+                
+                // Simulate API call
+                setTimeout(function() {
+                // Simulate login success
+                var isAuthenticated = true;
+                if (isAuthenticated) {
+                    $('#authLink').text('Profile').attr('href', '#profile');
+                    showSection('#profile');
+                        
+                        // Show success message with user type
+                        var userTypeName = userType.charAt(0).toUpperCase() + userType.slice(1);
+                        if (userType === 'hod') userTypeName = 'HOD';
+                        if (userType === 'admin') userTypeName = 'College Admin';
+                        
+                        $form.append('<div class="success-message">Login successful! Welcome, ' + userTypeName + '.</div>');
+                        setTimeout(function() {
+                            $('.success-message').fadeOut();
+                        }, 3000);
+                    }
+                    
+                    // Remove loading state
+                    $btn.removeClass('loading').prop('disabled', false);
+                }, 1500);
+            });
+
+            // Enhanced logout functionality
+            $('#logoutBtn').on('click', function() {
+                var $btn = $(this);
+                
+                // Add loading state
+                $btn.addClass('loading').prop('disabled', true);
+                
+                setTimeout(function() {
+                // Simulate logout
+                $('#authLink').text('Login').attr('href', '#login');
+                showSection('#login');
+                    
+                    // Remove loading state
+                    $btn.removeClass('loading').prop('disabled', false);
+                }, 800);
+            });
+
+            // Search functionality
+            $('.search-bar input').on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    $('.search-bar .btn').click();
+                }
+            });
+
+            $('.search-bar .btn').on('click', function(e) {
+                e.preventDefault();
+                var searchTerm = $('.search-bar input').val();
+                if (searchTerm.trim()) {
+                    // Simulate search - show colleges section
+                    showSection('#colleges');
+                    $('.search-bar input').val('');
+                }
+            });
+
+            // Form input focus effects
+            $('.form-group input').on('focus', function() {
+                $(this).parent().addClass('focused');
+            }).on('blur', function() {
+                $(this).parent().removeClass('focused');
+            });
+
+            // Add easing function for smooth animations
+            $.easing.easeInOutCubic = function (x, t, b, c, d) {
+                if ((t/=d/2) < 1) return c/2*t*t*t + b;
+                return c/2*((t-=2)*t*t + 2) + b;
+            };
+
+            // Initialize animations on page load
+            setTimeout(function() {
+                $('.hero-content').addClass('animate-in');
+            }, 100);
+        });
+    </script>
+</body>
+</html>

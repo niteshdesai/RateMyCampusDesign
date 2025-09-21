@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate My Campus - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for social media icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="college.css">
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar-container"></div>
+    
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- HOME SECTION -->
+        <section id="home">
+            <div class="hero">
+                <div class="education-elements"></div>
+                <div class="hero-content">
+                    <h1>Find Your Perfect University</h1>
+                    <p class="tagline">Explore ratings, reviews, and detailed information about colleges and professors.</p>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search for colleges or teachers...">
+                        <a href="colleges.html" class="btn btn-primary">Search</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Featured Colleges Section -->
+            <div class="featured-colleges">
+                <h2>Featured Colleges</h2>
+                <div class="card-grid" id="featured-colleges-container">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER COMPONENT -->
+    <div id="footer-container"></div>
+
+    <!-- JAVASCRIPT -->
+    <script src="api.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Load navbar component
+            $('#navbar-container').load('navbar.html');
+            
+            // Load footer component
+            $('#footer-container').load('footer.html');
+            
+            // Fetch featured colleges (only 3)
+            fetchFeaturedColleges();
+
+            // Card hover effects
+            $(document).on('mouseenter', '.card', function() {
+                $(this).addClass('hovered');  
+            });
+            
+            $(document).on('mouseleave', '.card', function() {
+                $(this).removeClass('hovered');
+            });
+            
+            // Search functionality
+            $('.search-bar input').on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    window.location.href = 'colleges.html';
+                }
+            });
+            
+            $('.search-bar .btn').on('click', function(e) {
+                e.preventDefault();
+                var searchTerm = $('.search-bar input').val();
+                if (searchTerm.trim()) {
+                    window.location.href = 'colleges.html';
+                }
+            });
+
+            // Initialize animations on page load
+            setTimeout(function() {
+                $('.hero-content').addClass('animate-in');
+            }, 100);
+        });
+        
+        // Function to fetch featured colleges (only 3)
+        function fetchFeaturedColleges() {
+            API.getColleges()
+                .done(function(colleges) {
+                    // Take only the first 3 colleges
+                 
+                    var featuredColleges = colleges.slice(0, 3);
+
+                   
+                  
+                    renderColleges(featuredColleges, '#featured-colleges-container');
+                })
+                .fail(function(error) {
+                    console.error('Error fetching featured colleges:', error);
+                    $('#featured-colleges-container').html('<p class="error-message">Failed to load colleges. Please try again later.</p>');
+                });
+        }
+        
+        // Function to render college cards
+        function renderColleges(colleges, containerId) {
+
+          
+            var container = $(containerId);
+            container.empty();
+            if (!colleges || colleges.length === 0) {
+                container.html('<p>No colleges found.</p>');
+                return;
+            }
+            colleges.forEach(function(college) {
+
+                
+                var imageUrl = college.cimg && college.cimg.trim() !== ''
+                    ? API.getBaseUrl() + '/' + college.cimg.replace(/^\/+/, '')
+                    : (function() {
+                        var firstLetter = college.cname ? college.cname.charAt(0).toUpperCase() : 'C';
+                        return 'https://placehold.co/600x400/' +
+                            (firstLetter.charCodeAt(0) % 2 === 0 ? '3b82f6' : 'f97316') +
+                            '/FFFFFF?text=' + encodeURIComponent(firstLetter);
+                    })();
+                var desc = (college.cdesc && college.cdesc.trim() !== '') ? college.cdesc : '';
+                if (desc.length > 80) desc = desc.substring(0, 77) + '...';
+                // Initially show 0 rating, will update after API call
+                var rating = 0;
+                var stars = '';
+                for (var i = 1; i <= 5; i++) {
+                    stars += i <= rating ? '\u2605' : '\u2606';
+                }
+                var card = $('<div>')
+                    .attr('class', 'card')
+                    .attr('data-category', college.category || 'college')
+                    .attr('data-college-id', college.cid);
+                card.html(`
+                    <img src="${imageUrl}" alt="${college.cname}" class="card-image">
+                    <div class="card-content">
+                        <h3>${college.cname}</h3>
+                        <p class="card-description">${desc}</p>
+                        <div class="card-rating">
+                            <span class="rating-stars">${stars}</span>
+                            <span class="rating-number">0.0</span>
+                            <span class="rating-count">(0 reviews)</span>
+                        </div>
+                    </div>
+                `);
+                container.append(card);
+                // Fetch and update rating
+                API.getCollegeRating(college.cid).done(function(avg) {
+                    var ratingValue = (typeof avg === 'number') ? avg : 0;
+                    var starsHtml = '';
+                    for (var i = 1; i <= 5; i++) {
+                        starsHtml += i <= ratingValue ? '\u2605' : '\u2606';
+                    }
+                    card.find('.rating-stars').text(starsHtml);
+                    card.find('.rating-number').text(ratingValue.toFixed(1));
+                    });
+                    // Redirect to college detail page on card click
+                    container.off('click', '.card').on('click', '.card', function() {
+                        var collegeId = $(this).data('college-id');
+                        window.location.href = 'college-detail.html?collegeId=' + encodeURIComponent(collegeId);
+                });
+                // Fetch and update review count
+                API.getCollegeReviewCount(college.cid).done(function(count) {
+                    
+                    var reviewCount = (typeof count === 'number') ? count : 0;
+                    card.find('.rating-count').text('(' + reviewCount + ' reviews)');
+                });
+            });
+        }
+    </script>
+</body>
+</html>

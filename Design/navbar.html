@@ -1,0 +1,44 @@
+<!-- NAV BAR -->
+<nav class="navbar">
+    <a href="index.html" class="logo">
+        <img src="assets/logo5.png" alt="Rate My Campus Logo" class="logo-image">
+        <span class="logo-text">Rate My Campus</span>
+    </a>
+    <div class="hamburger-menu" id="hamburger-menu">
+        <i class="fas fa-bars"></i>
+    </div>
+    <div class="navbar-links" id="navbarLinks">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="colleges.html" class="nav-link">Colleges</a>
+        <a href="login.html" class="nav-link login-btn" id="authLink">Login</a>
+    </div>
+</nav>
+
+<!-- Navbar JavaScript -->
+<script>
+    $(document).ready(function() {
+        // Navbar scroll effect
+        $(window).scroll(function() {
+            if ($(window).scrollTop() > 50) {
+                $('.navbar').addClass('scrolled');
+            } else {
+                $('.navbar').removeClass('scrolled');
+            }
+        });
+
+        // Handle hamburger menu toggle on mobile
+        $('#hamburger-menu').on('click', function() {
+            $('#navbarLinks').toggleClass('active');
+            $(this).toggleClass('active');
+        });
+
+        // Swap Login -> Profile based on auth state
+        var user = null;
+        try { user = JSON.parse(localStorage.getItem('rmc_user') || 'null'); } catch(e) {}
+        if (user && user.role) {
+            $('#authLink').attr('href', 'profile.html').text('Profile');
+        } else {
+            $('#authLink').attr('href', 'login.html').text('Login');
+        }
+    });
+</script>

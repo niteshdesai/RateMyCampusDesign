@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate My Campus - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for social media icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="login.css">
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="api.js"></script>
+</head>
+<body>
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar-container"></div>
+    
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- LOGIN SECTION -->
+        <section id="login" class="login-section">
+            <div class="form-container">
+                <div id="loginError" class="alert" style="display:none;"></div>
+                <h2>Login</h2>
+                
+                <!-- Login Tabs -->
+                <div class="login-tabs">
+                    <div class="tab active" data-tab="student">Student</div>
+                    <div class="tab" data-tab="hod">HOD</div>
+                    <div class="tab" data-tab="admin">College Admin</div>
+                </div>
+
+                <!-- Student Login Form -->
+                <form id="studentForm" class="login-form active">
+                    <div class="form-group">
+                        <label for="enrollment">Enrollment Number</label>
+                        <input type="text" id="enrollment" name="enrollment" placeholder="Enter your enrollment number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="semester">Semester</label>
+                        <input type="number" id="semester" name="semester" placeholder="Enter your semester" min="1" max="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="college">College</label>
+                        <select id="college" name="collegeId" required>
+                            <option value="">Select your college</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-secondary w-full">Login as Student</button>
+                </form>
+
+                <!-- HOD Login Form -->
+                <form id="hodForm" class="login-form">
+                    <div class="form-group">
+                        <label for="hodEmail">Email</label>
+                        <input type="email" id="hodEmail" name="email" placeholder="Enter your email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hodPassword">Password</label>
+                        <input type="password" id="hodPassword" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-secondary w-full">Login as HOD</button>
+                </form>
+
+                <!-- College Admin Login Form -->
+                <form id="adminForm" class="login-form">
+                    <div class="form-group">
+                        <label for="adminEmail">Email</label>
+                        <input type="email" id="adminEmail" name="email" placeholder="Enter your email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">Password</label>
+                        <input type="password" id="adminPassword" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-secondary w-full">Login as Admin</button>
+                </form>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- FOOTER COMPONENT -->
+    <div id="footer-container"></div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        $(document).ready(function() {
+            // Load navbar component
+            $('#navbar-container').load('navbar.html');
+            
+            // Load footer component
+            $('#footer-container').load('footer.html');
+
+            // Populate College select from API
+            function populateCollegeSelect(items) {
+                var $sel = $('#college');
+                $sel.empty();
+                $sel.append('<option value="">Select your college</option>');
+                if (!items || !items.length) return;
+                $.each(items, function(_, c) {
+                    var id = c.id || c.cid || c.c_id || '';
+                    var name = c.name || c.cname || c.collegeName || 'Unnamed College';
+                    $sel.append('<option value="' + id + '">' + name + '</option>');
+                });
+            }
+
+            API.getColleges()
+                .done(function(res) {
+                    var items = Array.isArray(res) ? res : (res && res.data) ? res.data : [];
+                    populateCollegeSelect(items);
+                })
+                .fail(function() {
+                    populateCollegeSelect([]);
+                });
+
+            // Tab switching functionality
+            $('.tab').on('click', function() {
+                var tabId = $(this).data('tab');
+                
+                // Remove active class from all tabs and forms
+                $('.tab').removeClass('active');
+                $('.login-form').removeClass('active');
+                
+                // Add active class to clicked tab and corresponding form
+                $(this).addClass('active');
+                $('#' + tabId + 'Form').addClass('active');
+            });
+
+            // Enhanced login functionality for all forms
+            $('.login-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                var $btn = $(this).find('button[type="submit"]');
+                var $form = $(this);
+                var formId = $(this).attr('id');
+                var userType = formId.replace('Form', '');
+                
+                // Add loading state
+                $btn.addClass('loading').prop('disabled', true);
+                
+                // Build payload per role
+                var payload = {};
+                if (userType === 'student') {
+                    payload = {
+                        enrollment: $('#enrollment').val(),
+                        semester: Number($('#semester').val()),
+                        collegeId: $('#college').val(),
+                        role: 'student'
+                    };
+                    // Basic required validation for student fields
+                    if (!payload.enrollment || !payload.semester || !payload.collegeId) {
+                        $('#loginError').text('Please enter enrollment, semester and select your college.').show();
+                        $btn.removeClass('loading').prop('disabled', false);
+                        return;
+                    }
+                } else if (userType === 'admin') {
+                    payload = { email: $('#adminEmail').val(), password: $('#adminPassword').val(), role: 'admin' };
+                } else if (userType === 'hod') {
+                    payload = { email: $('#hodEmail').val(), password: $('#hodPassword').val(), role: 'hod' };
+                }
+
+                // Call backend per role
+                var loginCall = userType === 'student' ? API.loginStudent(payload)
+                              : userType === 'admin' ? API.loginAdmin(payload)
+                              : API.loginHod(payload);
+
+                loginCall
+                    .done(function(res) {
+                        try {
+                            // Check for error response in string format
+                            if (typeof res === 'string' && res.includes('INVALID')) {
+                                $('#loginError').text('Invalid login details: ' + res).show();
+                                $btn.removeClass('loading').prop('disabled', false);
+                                return;
+                            }
+                            
+                            if (res && res.token) localStorage.setItem('rmc_token', res.token);
+                            if (res && res.user) localStorage.setItem('rmc_user', JSON.stringify(res.user));
+                            // Fallback build minimal user if backend returns just token
+                            if (!res || !res.user) {
+                                var minimalUser = { role: userType, name: (userType==='student'?'Student User':userType==='admin'?'College Admin':'Department Admin') };
+                                if (userType==='student') { minimalUser.enrollment = payload.enrollment; minimalUser.semester = payload.semester;minimalUser.collegeId=payload.collegeId }
+                                if (userType!=='student') { minimalUser.email = payload.email; }
+                                localStorage.setItem('rmc_user', JSON.stringify(minimalUser));
+                            }
+                            window.location.href = 'profile.html';
+                        } catch (e) {
+                            $('#loginError').text('Error processing login response').show();
+                            $btn.removeClass('loading').prop('disabled', false);
+                            return;
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var msg = 'Login failed';
+                        if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                        $('#loginError').text(msg).show();
+                    })
+                    .always(function() { $btn.removeClass('loading').prop('disabled', false); });
+            });
+
+            // Form input focus effects
+            $('.form-group input, .form-group select').on('focus', function() {
+                $(this).parent().addClass('focused');
+            }).on('blur', function() {
+                $(this).parent().removeClass('focused');
+            });
+        });
+    </script>
+</body>
+</html>
