@@ -56,7 +56,7 @@
             }
         }).done(function(head) {
             if (head) {
-                console.log('Department head:', head);
+              
                 updateDepartmentHead(head);
             }
         }).fail(function() {
@@ -68,9 +68,11 @@
     function updateDepartmentHead(head) {
         var $headCard = $('.department-sidebar .faculty-card');
         var $headInfo = $('.department-sidebar .faculty-info');
-        var profileImg = head.da_img || 'https://placehold.co/60x60/3b82f6/FFFFFF?text=' + encodeURIComponent(head.name?.charAt(0) || 'H');
-        $('.department-sidebar .faculty-image').attr('src', profileImg);
+        var profileImg = head.da_img || 'https://placehold.co/80x80/3b82f6/FFFFFF?text=' + encodeURIComponent(head.name?.charAt(0) || 'H');
+        $('.department-sidebar .faculty-image').attr('src', profileImg).attr('alt', head.name || 'Department Head');
         $headInfo.find('h4').text(head.name || 'Department Head');
+        $headInfo.find('p').eq(0).text(head.title || 'Head of Department');
+        $headInfo.find('p').eq(1).text(head.email || 'Email not available');
     }
 
     // Fetch department statistics
@@ -192,13 +194,13 @@
                         var coursesList = '<p class="faculty-courses"><strong>Courses:</strong> ' + member.courses.join(', ') + '</p>';
                         $card.append(coursesList);
                     }
-                    var ratingStars = '<span class="rating-stars" id="teacher-stars-' + member.tid + '">&#9733;&#9733;&#9733;&#9733;&#9734;</span>';
+                    var ratingStars = '<span class="rating-stars" id="teacher-stars-' + member.tid + '"></span>';
                     var ratingNumber = '<span class="rating-number" id="teacher-rating-' + member.tid + '">-</span>';
                     var ratingCount = '<span class="rating-count" id="teacher-count-' + member.tid + '"></span>';
                     var ratingDiv = '<div class="faculty-rating">' + ratingStars + ' ' + ratingNumber + ' ' + ratingCount + '</div>';
                     $card.append(ratingDiv);
                     var user = getUserFromLocalStorage();
-                    var showRate = user && user.role === 'student';
+                    var showRate = user && user.role === 'student' && user.collegeId && String(user.collegeId) === String(member.collegeId);
                     if (showRate) {
                         $card.append('<button class="rate-teacher-btn btn-primary" data-teacher-id="' + member.tid + '">Rate Teacher</button>');
                     }
@@ -225,11 +227,18 @@
                             }
                         }
                         var avg = count > 0 ? totalScore / count : 0;
-                        var starsHtml = '';
-                        for (var i = 1; i <= 5; i++) {
-                            starsHtml += i <= Math.round(avg) ? '\u2605' : '\u2606';
-                        }
-                        $('#teacher-stars-' + member.tid).text(starsHtml);
+                        var starsHtml = (function(ratingValue){
+                            var full = Math.floor(ratingValue);
+                            var hasHalf = (ratingValue - full) >= 0.5 && full < 5;
+                            var html = '';
+                            for (var i = 1; i <= 5; i++) {
+                                if (i <= full) html += '<i class="fas fa-star"></i>';
+                                else if (hasHalf && i === full + 1) html += '<i class="fas fa-star-half-alt"></i>';
+                                else html += '<i class="far fa-star"></i>';
+                            }
+                            return html;
+                        })(avg);
+                        $('#teacher-stars-' + member.tid).html(starsHtml);
                         $('#teacher-rating-' + member.tid).text(avg.toFixed(1));
                         $('#teacher-count-' + member.tid).text('(' + count + ' reviews)');
                     });
@@ -373,6 +382,7 @@
                         // Add 'Authorization': 'Bearer ' + window.localStorage.getItem('rmc_jwt') if JWT is required for auth
                     }
                 }).done(function(teacherCourses) {
+                  
                     
                     // Step 2: Fetch student's enrolled courses
                     $.ajax({
@@ -383,18 +393,21 @@
                             // Add 'Authorization': 'Bearer ' + window.localStorage.getItem('rmc_jwt') if JWT is required for auth
                         }
                     }).done(function(studentEnrollment) {
-                        console.log('Student enrollment:', studentEnrollment);
-                            var teacherCourseIds = teacherCourses.course;
-                            console.log('Teacher courses:', teacherCourses.course);
-                            var studentCourseIds = studentEnrollment.courseId;
+                        var courseId = null;
+                        for (let course of (Array.isArray(teacherCourses) ? teacherCourses : (teacherCourses?.course || []))) {
+                            if (course.courseId === studentEnrollment.courseId || course.cid === studentEnrollment.courseId || course.id === studentEnrollment.courseId) {
+                                courseId = course.courseId || course.cid || course.id;
+                                break;
+                            }
+                        }
 
-                            // var courseId = teacherCourseIds.find(function(cid) { return studentCourseIds.includes(cid); });
-                            //  console.log('Matched course ID:', courseId);
+                      
                         if (!courseId) {
                             alert('Unable to submit rating: No matching course found between you and the teacher.');
                             return;
                         }
 
+                        var studentId = studentEnrollment.sid;
                         // Step 3: Submit the rating
                         $.ajax({
                             url: baseUrl + '/api/rating-teachers',
@@ -405,11 +418,12 @@
                                 // Add 'Authorization': 'Bearer ' + window.localStorage.getItem('rmc_jwt') if JWT is required for auth
                             },
                             data: JSON.stringify({
-                                score: score,
-                                departmentId: departmentId,
-                                teacherId: teacherId,
-                                courseId: courseId
+                                score: Number(score),
+                                teacher: { tid: Number(teacherId) },
+                                student: { sid: Number(studentId) },
+                                course: { c_id: Number(courseId) }
                             })
+                           
                         }).done(function(response) {
                             alert('Thank you for rating! You gave ' + score + ' star(s).');
                             fetchDepartmentFaculty(departmentId, $('.faculty-tab.active').data('course') || 'all');

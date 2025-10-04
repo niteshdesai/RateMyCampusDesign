@@ -98,21 +98,25 @@
                     var $stats = $('<div class="department-stats"><span class="stat students">Loading Students...</span><span class="stat faculty">Loading Faculty...</span></div>');
                     $card.append($stats);
                     $departmentsGrid.append($card);
-                    // Fetch student count
+                    // Fetch student count (use department count endpoint for accuracy)
                     $.ajax({
-                        url: baseUrl + '/api/students?departmentId=' + encodeURIComponent(deptId),
+                        url: baseUrl + '/api/departments/' + encodeURIComponent(deptId) + '/students/count',
                         method: 'GET'
-                    }).done(function(students) {
-                        var count = Array.isArray(students) ? students.length : 0;
-                        $stats.find('.students').text(count + ' Students');
+                    }).done(function(count) {
+                        var studentCount = (typeof count === 'number') ? count : 0;
+                        $stats.find('.students').text(studentCount + ' Students');
+                    }).fail(function() {
+                        $stats.find('.students').text('0 Students');
                     });
-                    // Fetch faculty count
+                    // Fetch faculty count (use department count endpoint for accuracy)
                     $.ajax({
-                        url: baseUrl + '/api/teachers?departmentId=' + encodeURIComponent(deptId),
+                        url: baseUrl + '/api/departments/' + encodeURIComponent(deptId) + '/teachers/count',
                         method: 'GET'
-                    }).done(function(faculty) {
-                        var count = Array.isArray(faculty) ? faculty.length : 0;
-                        $stats.find('.faculty').text(count + ' Faculty');
+                    }).done(function(count) {
+                        var facultyCount = (typeof count === 'number') ? count : 0;
+                        $stats.find('.faculty').text(facultyCount + ' Faculty');
+                    }).fail(function() {
+                        $stats.find('.faculty').text('0 Faculty');
                     });
                 });
             } else {
@@ -212,6 +216,19 @@
         // Optionally update page title
         document.title = `Rate My Campus - ${college.cname || ''}`;
 
+        // Helper to render stars with halves
+        function renderStarsWithHalf(ratingValue) {
+            var full = Math.floor(ratingValue);
+            var hasHalf = (ratingValue - full) >= 0.5 && full < 5;
+            var html = '';
+            for (var i = 1; i <= 5; i++) {
+                if (i <= full) html += '<i class="fas fa-star"></i>';
+                else if (hasHalf && i === full + 1) html += '<i class="fas fa-star-half-alt"></i>';
+                else html += '<i class="far fa-star"></i>';
+            }
+            return html;
+        }
+
         // Fetch and display rating and review count
         var baseUrl = window.localStorage.getItem('rmc_api_base') || 'http://localhost:8080';
         // Rating
@@ -220,11 +237,8 @@
             method: 'GET'
         }).done(function(rating) {
             var ratingValue = (typeof rating === 'number') ? rating : 0;
-            var starsHtml = '';
-            for (var i = 1; i <= 5; i++) {
-                starsHtml += i <= Math.round(ratingValue) ? '\u2605' : '\u2606';
-            }
-            $(".rating-stars").text(starsHtml);
+            var starsHtml = renderStarsWithHalf(ratingValue);
+            $(".rating-stars").html(starsHtml);
             $(".rating-number").text(ratingValue.toFixed(1));
         });
         // Review count

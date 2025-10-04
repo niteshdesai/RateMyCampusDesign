@@ -70,12 +70,17 @@ async function getStudentByEnrollment(enrollmentNumber) {
                     return;
                 }
 
-                console.log(JSON.stringify({ score: parseInt(rating, 10), collegeId: collegeId, studentId: studentId }));
+                var payload = {
+                    score: parseInt(rating, 10),
+                    college: { cid: parseInt(collegeId, 10) },
+                    student: { sid: parseInt(studentId, 10) }
+                };
+                console.log('College rating payload:', JSON.stringify(payload, null, 2));
                 $.ajax({
                     url: BASE_URL +'/api/ratings/addCollegeRating',
                     method: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({ score: parseInt(rating, 10), collegeId: collegeId, studentId: studentId }),
+                    data: JSON.stringify(payload),
                     headers: { 'Authorization': 'Bearer ' + jwt },
                     success: function() {
                         $modal.hide();

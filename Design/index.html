@@ -119,6 +119,17 @@
                 container.html('<p>No colleges found.</p>');
                 return;
             }
+            function renderStars(rating) {
+                var full = Math.floor(rating);
+                var hasHalf = (rating - full) >= 0.5 && full < 5;
+                var html = '';
+                for (var i = 1; i <= 5; i++) {
+                    if (i <= full) html += '<i class="fas fa-star"></i>';
+                    else if (hasHalf && i === full + 1) html += '<i class="fas fa-star-half-alt"></i>';
+                    else html += '<i class="far fa-star"></i>';
+                }
+                return html;
+            }
             colleges.forEach(function(college) {
 
                 
@@ -134,10 +145,7 @@
                 if (desc.length > 80) desc = desc.substring(0, 77) + '...';
                 // Initially show 0 rating, will update after API call
                 var rating = 0;
-                var stars = '';
-                for (var i = 1; i <= 5; i++) {
-                    stars += i <= rating ? '\u2605' : '\u2606';
-                }
+                var stars = renderStars(rating);
                 var card = $('<div>')
                     .attr('class', 'card')
                     .attr('data-category', college.category || 'college')
@@ -158,11 +166,8 @@
                 // Fetch and update rating
                 API.getCollegeRating(college.cid).done(function(avg) {
                     var ratingValue = (typeof avg === 'number') ? avg : 0;
-                    var starsHtml = '';
-                    for (var i = 1; i <= 5; i++) {
-                        starsHtml += i <= ratingValue ? '\u2605' : '\u2606';
-                    }
-                    card.find('.rating-stars').text(starsHtml);
+                    var starsHtml = renderStars(ratingValue);
+                    card.find('.rating-stars').html(starsHtml);
                     card.find('.rating-number').text(ratingValue.toFixed(1));
                     });
                     // Redirect to college detail page on card click
