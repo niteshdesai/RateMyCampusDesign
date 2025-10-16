@@ -252,15 +252,17 @@
 
         // Fetch and count students
         $.ajax({
-            url: baseUrl + '/api/students?collegeId=' + encodeURIComponent(college.cid),
+            url: baseUrl + '/api/students/college/' + encodeURIComponent(college.cid),
             method: 'GET'
         }).done(function(students) {
+
+            console.log(students);
             var count = Array.isArray(students) ? students.length : 0;
             $(".stats-grid .stat-item").eq(0).find('.stat-number').text(count);
         });
         // Fetch and count teachers
         $.ajax({
-            url: baseUrl + '/api/teachers?collegeId=' + encodeURIComponent(college.cid),
+            url: baseUrl + '/api/teachers/college/' + encodeURIComponent(college.cid),
             method: 'GET'
         }).done(function(teachers) {
             var count = Array.isArray(teachers) ? teachers.length : 0;
