@@ -2,6 +2,26 @@
 // Handles rating submission for college detail page
 
 var BASE_URL = window.localStorage.getItem('rmc_api_base') || 'http://127.0.0.1:8080';
+function getJwtToken() {
+    try {
+        var keys = ['rmc_jwt', 'rmc_token', 'jwt', 'token'];
+        for (var i = 0; i < keys.length; i++) {
+            var v = window.localStorage.getItem(keys[i]);
+            if (v && String(v).trim() !== '') return v;
+        }
+        // Fallback: extract from stored user object if present
+        var rawUser = window.localStorage.getItem('rmc_user');
+        if (rawUser) {
+            try {
+                var u = JSON.parse(rawUser);
+                var userToken = u?.token || u?.jwt || u?.accessToken || u?.access_token || u?.authorization;
+                if (userToken && String(userToken).trim() !== '') return userToken;
+            } catch (e2) {}
+        }
+    } catch (e) {}
+    return null;
+
+}
 // Async function to fetch student by enrollment number
 async function getStudentByEnrollment(enrollmentNumber) {
     try {
@@ -49,7 +69,8 @@ async function getStudentByEnrollment(enrollmentNumber) {
                 return;
             }
             var collegeId = new URLSearchParams(window.location.search).get('collegeId');
-            var jwt = window.localStorage.getItem('rmc_jwt');
+            var jwt = getJwtToken();
+            console.log("jwt:"+jwt)
             var user = null;
             var studentId = null;
             try { user = JSON.parse(window.localStorage.getItem('rmc_user')); } catch (e) {}
@@ -72,22 +93,24 @@ async function getStudentByEnrollment(enrollmentNumber) {
 
                 var payload = {
                     score: parseInt(rating, 10),
-                    college: { cid: parseInt(collegeId, 10) },
-                    student: { sid: parseInt(studentId, 10) }
+                    collegeId: parseInt(collegeId, 10),
+                    studentId: parseInt(studentId, 10)
                 };
-                console.log('College rating payload:', JSON.stringify(payload, null, 2));
+                console.log('College rating payload:', payload);
                 $.ajax({
                     url: BASE_URL +'/api/ratings/addCollegeRating',
                     method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(payload),
-                    headers: { 'Authorization': 'Bearer ' + jwt },
+                    // Use URL-encoded form data and no custom headers to avoid CORS preflight
+                    data: payload,
                     success: function() {
                         $modal.hide();
                         $form[0].reset();
                         location.reload(); // Refresh to update rating
                     },
                     error: function(xhr) {
+                        if (!jwt) {
+                            console.warn('JWT token not found in localStorage (checked rmc_jwt, rmc_token, jwt, token).');
+                        }
                         var msg = 'Failed to submit rating.';
                         if (xhr.responseText && xhr.responseText.toLowerCase().includes('already')) {
                             msg = 'You have already rated this college.';

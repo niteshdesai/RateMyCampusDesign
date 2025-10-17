@@ -23,11 +23,14 @@ window.API = (function() {
     }
    
 
-    // Attach bearer token automatically
+    // Attach bearer token automatically for non-GET requests only
     $.ajaxSetup({
-        beforeSend: function(xhr) {
-            var token = localStorage.getItem('rmc_token');
-            if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        beforeSend: function(xhr, settings) {
+            var method = (settings && (settings.type || settings.method) || 'GET').toUpperCase();
+            if (method !== 'GET') {
+                var token = localStorage.getItem('rmc_token');
+                if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
         }
     });
 

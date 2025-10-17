@@ -167,38 +167,62 @@
                               : userType === 'admin' ? API.loginAdmin(payload)
                               : API.loginHod(payload);
 
-                loginCall
-                    .done(function(res) {
-                        try {
-                            // Check for error response in string format
-                            if (typeof res === 'string' && res.includes('INVALID')) {
-                                $('#loginError').text('Invalid login details: ' + res).show();
-                                $btn.removeClass('loading').prop('disabled', false);
-                                return;
-                            }
-                            
-                            if (res && res.token) localStorage.setItem('rmc_token', res.token);
-                            if (res && res.user) localStorage.setItem('rmc_user', JSON.stringify(res.user));
-                            // Fallback build minimal user if backend returns just token
-                            if (!res || !res.user) {
-                                var minimalUser = { role: userType, name: (userType==='student'?'Student User':userType==='admin'?'College Admin':'Department Admin') };
-                                if (userType==='student') { minimalUser.enrollment = payload.enrollment; minimalUser.semester = payload.semester;minimalUser.collegeId=payload.collegeId }
-                                if (userType!=='student') { minimalUser.email = payload.email; }
-                                localStorage.setItem('rmc_user', JSON.stringify(minimalUser));
-                            }
-                            window.location.href = 'profile.html';
-                        } catch (e) {
-                            $('#loginError').text('Error processing login response').show();
-                            $btn.removeClass('loading').prop('disabled', false);
-                            return;
-                        }
-                    })
-                    .fail(function(xhr) {
-                        var msg = 'Login failed';
-                        if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                        $('#loginError').text(msg).show();
-                    })
-                    .always(function() { $btn.removeClass('loading').prop('disabled', false); });
+                              loginCall
+    .done(function(res) {
+        console.log('Full API Response:', JSON.stringify(res, null, 2)); // Log the entire response
+        try {
+            if (typeof res === 'string' && res.includes('.')) { // Check if res is a JWT string
+                localStorage.setItem('rmc_token', res);
+                console.log('Token stored in localStorage (raw JWT):', res);
+                // Verify storage
+                const storedToken = localStorage.getItem('rmc_token');
+                console.log('Verified token in localStorage:', storedToken);
+            } else if (res && res.token) { // Handle the expected JSON response
+                localStorage.setItem('rmc_token', res.token);
+                console.log('Token stored in localStorage:', res.token);
+                // Verify storage
+                const storedToken = localStorage.getItem('rmc_token');
+                console.log('Verified token in localStorage:', storedToken);
+            } else {
+                console.warn('No token field or valid JWT string found in API response:', res);
+            }
+
+            if (res && res.user) {
+                localStorage.setItem('rmc_user', JSON.stringify(res.user));
+                console.log('User stored:', res.user);
+            } else {
+                var minimalUser = { 
+                    role: userType, 
+                    name: (userType === 'student' ? 'Student User' : userType === 'admin' ? 'College Admin' : 'Department Admin') 
+                };
+                if (userType === 'student') { 
+                    minimalUser.enrollment = payload.enrollment; 
+                    minimalUser.semester = payload.semester;
+                    minimalUser.collegeId = payload.collegeId;
+                }
+                if (userType !== 'student') { 
+                    minimalUser.email = payload.email; 
+                }
+                localStorage.setItem('rmc_user', JSON.stringify(minimalUser));
+                console.log('Minimal user stored:', minimalUser);
+            }
+            window.location.href = 'profile.html';
+        } catch (e) {
+            console.error('Error processing login response:', e);
+            $('#loginError').text('Error processing login response').show();
+            $btn.removeClass('loading').prop('disabled', false);
+            return;
+        }
+    })
+    .fail(function(xhr) {
+        var msg = 'Login failed';
+        if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+        console.error('Login API error:', xhr.responseJSON || xhr);
+        $('#loginError').text(msg).show();
+    })
+    .always(function() { 
+        $btn.removeClass('loading').prop('disabled', false); 
+    });
             });
 
             // Form input focus effects
