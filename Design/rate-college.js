@@ -1,7 +1,7 @@
 // rate-college.js
 // Handles rating submission for college detail page
 
-var BASE_URL = window.localStorage.getItem('rmc_api_base') || 'http://127.0.0.1:8080';
+var BASE_URL = window.localStorage.getItem('rmc_api_base') || 'http://localhost:8080';
 function getJwtToken() {
     try {
         var keys = ['rmc_jwt', 'rmc_token', 'jwt', 'token'];
@@ -70,7 +70,7 @@ async function getStudentByEnrollment(enrollmentNumber) {
             }
             var collegeId = new URLSearchParams(window.location.search).get('collegeId');
             var jwt = getJwtToken();
-            console.log("jwt:"+jwt)
+            
             var user = null;
             var studentId = null;
             try { user = JSON.parse(window.localStorage.getItem('rmc_user')); } catch (e) {}
@@ -93,15 +93,25 @@ async function getStudentByEnrollment(enrollmentNumber) {
 
                 var payload = {
                     score: parseInt(rating, 10),
-                    collegeId: parseInt(collegeId, 10),
-                    studentId: parseInt(studentId, 10)
+                    college: { cid: parseInt(collegeId, 10) },
+                    student: { sid: parseInt(studentId, 10) }
                 };
                 console.log('College rating payload:', payload);
+                
+                // Prepare headers
+                var headers = {};
+                if (jwt) {
+                    headers['Authorization'] = 'Bearer ' + jwt;
+                }
+                
+                console.log('headers', headers);
+                console.log('BASE_URL', BASE_URL);
                 $.ajax({
                     url: BASE_URL +'/api/ratings/addCollegeRating',
                     method: 'POST',
-                    // Use URL-encoded form data and no custom headers to avoid CORS preflight
-                    data: payload,
+                    contentType: 'application/json',
+                    headers: headers,
+                    data: JSON.stringify(payload),
                     success: function() {
                         $modal.hide();
                         $form[0].reset();

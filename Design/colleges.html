@@ -89,8 +89,8 @@
             }
             
             colleges.forEach(function(college) {
-                var imageUrl = college.cimage && college.cimage.trim() !== ''
-                    ? college.cimage
+                var imageUrl = college.cimg && college.cimg.trim() !== ''
+                    ? API.getBaseUrl() + '/' + college.cimg.replace(/^\/+/, '')
                     : (function() {
                         var firstLetter = college.cname ? college.cname.charAt(0).toUpperCase() : 'C';
                         return 'https://placehold.co/600x400/' +
@@ -102,7 +102,7 @@
                 var rating = 0;
                 var stars = renderStars(rating);
                 var card = $('<a>')
-                    .attr('href', 'college-detail.html?id=' + college.cid)
+                    .attr('href', 'college-detail.html?collegeId=' + college.cid)
                     .attr('class', 'card')
                     .attr('data-category', college.category || 'college')
                     .attr('data-college-id', college.cid);

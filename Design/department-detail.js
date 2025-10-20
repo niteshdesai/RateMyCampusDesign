@@ -186,6 +186,8 @@
                         class: 'faculty-card',
                         'data-courses': (member.courses || []).join(',')
                     });
+
+
                     var profileImg = member.timg || 'https://placehold.co/80x80/3b82f6/FFFFFF?text=' + encodeURIComponent(member.tname?.charAt(0) || 'F');
                     $card.append('<div class="faculty-image"><img src="' + profileImg + '" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;"></div>');
                     $card.append('<h4>' + (member.tname || 'Faculty Member') + '</h4>');
