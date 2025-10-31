@@ -1,9 +1,9 @@
 // Simple API client config for frontend
 
-window.API = (function() {
+window.API = (function () {
     // Get a single college by its ID
-     var BASE_URL = window.localStorage.getItem('rmc_api_base') || 'http://localhost:8080';
-   
+    var BASE_URL = window.localStorage.getItem('rmc_api_base') || 'http://localhost:8080';
+
     // Get average rating for a college by its ID
     function getCollegeRating(collegeId) {
         var url = getBaseUrl() + '/api/ratings/college/' + encodeURIComponent(collegeId);
@@ -21,11 +21,11 @@ window.API = (function() {
             method: 'GET'
         });
     }
-   
+
 
     // Attach bearer token automatically for non-GET requests only
     $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
+        beforeSend: function (xhr, settings) {
             var method = (settings && (settings.type || settings.method) || 'GET').toUpperCase();
             if (method !== 'GET') {
                 var token = localStorage.getItem('rmc_token');
@@ -63,7 +63,7 @@ window.API = (function() {
         if (queryParams.length > 0) {
             url += '?' + queryParams.join('&');
         }
-    
+
         return $.ajax({
             url: url,
             method: 'POST',
@@ -88,7 +88,7 @@ window.API = (function() {
         if (queryParams.length > 0) {
             url += '?' + queryParams.join('&');
         }
-       
+
         return $.ajax({
             url: url,
             method: 'POST',
@@ -113,7 +113,7 @@ window.API = (function() {
         if (queryParams.length > 0) {
             url += '?' + queryParams.join('&');
         }
-  
+
         return $.ajax({
             url: url,
             method: 'POST',
@@ -132,11 +132,12 @@ window.API = (function() {
 
     function getStudentProfile(enrollment) {
         var url = getBaseUrl() + '/api/students/enroll/' + encodeURIComponent(enrollment);
-      
+
         return $.ajax({
             url: url,
             method: 'GET'
-        }).then(function(student) {
+        }).then(function (student) {
+            console.log('Fetched student profile from api:', student);
             if (!student) {
                 return $.Deferred().reject('Student not found').promise();
             }
@@ -148,7 +149,8 @@ window.API = (function() {
                 gender: student.sgender,
                 city: student.scity,
                 email: student.semail,
-                mobile: student.smobile
+                mobile: student.smobile,
+                image: student.simg
             };
         });
     }
@@ -160,7 +162,7 @@ window.API = (function() {
         loginHod: loginHod,
         loginAdmin: loginAdmin,
         getColleges: getColleges,
-      
+
         getStudentProfile: getStudentProfile,
         getCollegeRating: getCollegeRating,
         getCollegeReviewCount: getCollegeReviewCount

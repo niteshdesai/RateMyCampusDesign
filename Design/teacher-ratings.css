@@ -1,0 +1,302 @@
+/* Teacher Rating Styles */
+/* Compact Card Rating */
+.faculty-ratings {
+    margin: 0.75rem 0;
+}
+
+.rating-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.rating-stars i {
+    color: #fbbf24;
+    font-size: 1rem;
+}
+
+.rating-info {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.rating-number {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.rating-count {
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.view-details-btn {
+    margin-left: auto;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-details-btn:hover {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+}
+
+.view-details-btn i {
+    color: #3b82f6;
+    font-size: 0.9rem;
+}
+
+/* Rating Details Modal */
+#ratingDetailsModal .modal-content {
+    max-width: 480px;
+}
+
+.teacher-name {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+}
+
+.rating-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.overall-section {
+    text-align: center;
+}
+
+.overall-section h4 {
+    color: #4b5563;
+    margin-bottom: 1rem;
+}
+
+.big-rating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.big-stars i {
+    font-size: 1.5rem;
+    color: #fbbf24;
+}
+
+.big-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.rating-total {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.criteria-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.criteria-card {
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.criteria-icon {
+    background: #3b82f6;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+}
+
+.criteria-icon i {
+    color: white;
+    font-size: 1.1rem;
+}
+
+.criteria-content h5 {
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.criteria-rating i {
+    font-size: 0.9rem;
+    color: #fbbf24;
+}
+
+.criteria-score {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-top: 0.5rem;
+}
+
+.faculty-ratings {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(249, 250, 251, 0.8));
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Overall Rating Styles */
+.overall-rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.overall-rating .rating-stars {
+    display: flex;
+    gap: 3px;
+}
+
+.overall-rating .rating-stars i {
+    font-size: 1.2rem;
+    color: #fbbf24;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+}
+
+.overall-rating .rating-info {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.overall-rating .rating-number {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.overall-rating .rating-count {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+/* Criteria Ratings Styles */
+.criteria-ratings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.criteria-item {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.criteria-item:hover {
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.criteria-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.criteria-header i {
+    color: #3b82f6;
+    font-size: 0.9rem;
+    width: 16px;
+    text-align: center;
+}
+
+.criteria-label {
+    flex: 1;
+    font-size: 0.9rem;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.criteria-score {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.9rem;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.criteria-stars {
+    display: flex;
+    gap: 2px;
+    padding-left: 1.5rem;
+}
+
+.criteria-stars i {
+    font-size: 0.85rem;
+    color: #fbbf24;
+}
+
+/* Adjust faculty card spacing */
+.faculty-card {
+    padding: 1.25rem;
+}
+
+.faculty-card h4 {
+    margin-bottom: 0.75rem;
+}
+
+.faculty-card .faculty-title {
+    margin-bottom: 0.5rem;
+}
+
+.faculty-card .faculty-courses {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.rate-teacher-btn {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(to right, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.rate-teacher-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}

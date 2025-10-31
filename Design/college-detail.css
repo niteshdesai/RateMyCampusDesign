@@ -11,6 +11,102 @@ COLLEGE DETAIL PAGE STYLES
     margin: 0 auto;
 }
 
+/* Detailed Ratings */
+.detailed-ratings {
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.criteria-ratings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.criteria-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.criteria-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.criteria-label {
+    font-weight: 600;
+    color: #fff;
+    font-size: 1em;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.criteria-stars {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+}
+
+.criteria-stars i {
+    color: #ffd700;
+    font-size: 18px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.criteria-score {
+    min-width: 35px;
+    text-align: right;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.no-ratings {
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+    font-size: 0.9em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeInStar {
+    from {
+        opacity: 0;
+        transform: scale(0.5) rotate(-30deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+.criteria-item i {
+    margin-right: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .criteria-ratings {
+        grid-template-columns: 1fr;
+    }
+
+    .criteria-item {
+        margin: 0;
+    }
+}
+
 /* Modal (reuse styles similar to department) */
 .modal {
     display: none;
@@ -35,9 +131,24 @@ COLLEGE DETAIL PAGE STYLES
     animation: modalSlideIn 0.3s ease-out;
 }
 
+/* Make modal body scrollable when content is tall and keep actions visible */
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    /* limit modal height to viewport */
+}
+
 @keyframes modalSlideIn {
-    from { opacity: 0; transform: translateY(-50px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .modal-header {
@@ -51,21 +162,99 @@ COLLEGE DETAIL PAGE STYLES
     border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
 }
 
-.modal-header h3 { margin: 0; font-size: 1.5rem; font-weight: 600; }
-.modal-header .close { font-size: 2rem; font-weight: bold; cursor: pointer; }
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
 
-.modal-body { padding: 2rem; }
+.modal-header .close {
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+}
 
-.rating-section { margin-bottom: 1.5rem; }
-.rating-section label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-color); }
+.modal-body {
+    padding: 1.25rem 1.5rem;
+    overflow-y: auto;
+    flex: 1 1 auto;
+}
 
-.star-rating { display: flex; gap: 0.5rem; margin-bottom: 2rem; justify-content: center; }
-.star-rating input[type="radio"] { display: none; }
-.star-rating label { font-size: 3rem; color: #ddd; cursor: pointer; transition: all 0.2s ease; margin: 0; user-select: none; }
-.star-rating label.active { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.6); }
+.rating-section {
+    margin-bottom: 1.5rem;
+}
 
-.modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; }
-.modal-actions .btn { padding: 0.75rem 1.5rem; font-weight: 600; }
+.rating-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.star-rating {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.star-rating input[type="radio"] {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 3rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0;
+    user-select: none;
+}
+
+.star-rating label.active {
+    color: #fbbf24;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.modal-actions .btn {
+    padding: 0.6rem 1rem;
+    font-weight: 600;
+}
+
+/* Keep the action buttons visible when modal body scrolls */
+.modal-actions {
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
+    padding: 0.75rem 0 0.5rem 0;
+}
+
+/* Slightly reduce star size to fit more compact modal */
+.star-rating label {
+    font-size: 2.4rem;
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        max-width: 95%;
+        margin: 8% auto;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .star-rating label {
+        font-size: 2rem;
+    }
+}
 
 /* College Header */
 .college-header {
