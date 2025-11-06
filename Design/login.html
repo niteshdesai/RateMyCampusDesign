@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,10 +15,11 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="api.js"></script>
 </head>
+
 <body>
     <!-- NAVBAR COMPONENT -->
     <div id="navbar-container"></div>
-    
+
     <!-- MAIN CONTENT -->
     <main>
         <!-- LOGIN SECTION -->
@@ -25,7 +27,7 @@
             <div class="form-container">
                 <div id="loginError" class="alert" style="display:none;"></div>
                 <h2>Login</h2>
-                
+
                 <!-- Login Tabs -->
                 <div class="login-tabs">
                     <div class="tab active" data-tab="student">Student</div>
@@ -37,11 +39,13 @@
                 <form id="studentForm" class="login-form active">
                     <div class="form-group">
                         <label for="enrollment">Enrollment Number</label>
-                        <input type="text" id="enrollment" name="enrollment" placeholder="Enter your enrollment number" required>
+                        <input type="text" id="enrollment" name="enrollment" placeholder="Enter your enrollment number"
+                            required>
                     </div>
                     <div class="form-group">
                         <label for="semester">Semester</label>
-                        <input type="number" id="semester" name="semester" placeholder="Enter your semester" min="1" max="8" required>
+                        <input type="number" id="semester" name="semester" placeholder="Enter your semester" min="1"
+                            max="8" required>
                     </div>
                     <div class="form-group">
                         <label for="college">College</label>
@@ -60,7 +64,8 @@
                     </div>
                     <div class="form-group">
                         <label for="hodPassword">Password</label>
-                        <input type="password" id="hodPassword" name="password" placeholder="Enter your password" required>
+                        <input type="password" id="hodPassword" name="password" placeholder="Enter your password"
+                            required>
                     </div>
                     <button type="submit" class="btn btn-secondary w-full">Login as HOD</button>
                 </form>
@@ -69,11 +74,13 @@
                 <form id="adminForm" class="login-form">
                     <div class="form-group">
                         <label for="adminEmail">Email</label>
-                        <input type="email" id="adminEmail" name="email" placeholder="Enter your email address" required>
+                        <input type="email" id="adminEmail" name="email" placeholder="Enter your email address"
+                            required>
                     </div>
                     <div class="form-group">
                         <label for="adminPassword">Password</label>
-                        <input type="password" id="adminPassword" name="password" placeholder="Enter your password" required>
+                        <input type="password" id="adminPassword" name="password" placeholder="Enter your password"
+                            required>
                     </div>
                     <button type="submit" class="btn btn-secondary w-full">Login as Admin</button>
                 </form>
@@ -87,10 +94,10 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Load navbar component
             $('#navbar-container').load('navbar.html');
-            
+
             // Load footer component
             $('#footer-container').load('footer.html');
 
@@ -100,7 +107,7 @@
                 $sel.empty();
                 $sel.append('<option value="">Select your college</option>');
                 if (!items || !items.length) return;
-                $.each(items, function(_, c) {
+                $.each(items, function (_, c) {
                     var id = c.id || c.cid || c.c_id || '';
                     var name = c.name || c.cname || c.collegeName || 'Unnamed College';
                     $sel.append('<option value="' + id + '">' + name + '</option>');
@@ -108,39 +115,56 @@
             }
 
             API.getColleges()
-                .done(function(res) {
+                .done(function (res) {
                     var items = Array.isArray(res) ? res : (res && res.data) ? res.data : [];
                     populateCollegeSelect(items);
                 })
-                .fail(function() {
+                .fail(function () {
                     populateCollegeSelect([]);
                 });
 
             // Tab switching functionality
-            $('.tab').on('click', function() {
+            $('.tab').on('click', function () {
                 var tabId = $(this).data('tab');
-                
+
                 // Remove active class from all tabs and forms
                 $('.tab').removeClass('active');
                 $('.login-form').removeClass('active');
-                
+
                 // Add active class to clicked tab and corresponding form
                 $(this).addClass('active');
                 $('#' + tabId + 'Form').addClass('active');
             });
 
+            // small helper to decode JWT payload (base64url)
+            function decodeJwtPayload(token) {
+                try {
+                    const parts = token.split('.');
+                    if (parts.length < 2) return null;
+                    let payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                    while (payload.length % 4) payload += '=';
+                    const decoded = atob(payload);
+                    const json = decodeURIComponent(decoded.split('').map(function (c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+                    return JSON.parse(json);
+                } catch (e) {
+                    return null;
+                }
+            }
+
             // Enhanced login functionality for all forms
-            $('.login-form').on('submit', function(e) {
+            $('.login-form').on('submit', function (e) {
                 e.preventDefault();
-                
+
                 var $btn = $(this).find('button[type="submit"]');
                 var $form = $(this);
                 var formId = $(this).attr('id');
                 var userType = formId.replace('Form', '');
-                
+
                 // Add loading state
                 $btn.addClass('loading').prop('disabled', true);
-                
+
                 // Build payload per role
                 var payload = {};
                 if (userType === 'student') {
@@ -164,74 +188,107 @@
 
                 // Call backend per role
                 var loginCall = userType === 'student' ? API.loginStudent(payload)
-                              : userType === 'admin' ? API.loginAdmin(payload)
-                              : API.loginHod(payload);
+                    : userType === 'admin' ? API.loginAdmin(payload)
+                        : API.loginHod(payload);
 
-                              loginCall
-    .done(function(res) {
-        console.log('Full API Response:', JSON.stringify(res, null, 2)); // Log the entire response
-        try {
-            if (typeof res === 'string' && res.includes('.')) { // Check if res is a JWT string
-                localStorage.setItem('rmc_token', res);
-                console.log('Token stored in localStorage (raw JWT):', res);
-                // Verify storage
-                const storedToken = localStorage.getItem('rmc_token');
-                console.log('Verified token in localStorage:', storedToken);
-            } else if (res && res.token) { // Handle the expected JSON response
-                localStorage.setItem('rmc_token', res.token);
-                console.log('Token stored in localStorage:', res.token);
-                // Verify storage
-                const storedToken = localStorage.getItem('rmc_token');
-                console.log('Verified token in localStorage:', storedToken);
-            } else {
-                console.warn('No token field or valid JWT string found in API response:', res);
-            }
+                loginCall
+                    .done(function (res) {
+                        console.log('Full API Response:', JSON.stringify(res, null, 2)); // Log the entire response
+                        try {
+                            // normalize token value (either raw string or res.token)
+                            const token = (typeof res === 'string' && res.includes('.')) ? res : (res && res.token ? res.token : null);
+                            if (token) {
+                                // keep existing student behavior (rmc_token)
+                                if (userType === 'student') {
+                                    localStorage.setItem('rmc_token', token);
+                                }
+                                // for HOD, store the full JWT payload into rmc_hod_user and also keep token if desired
+                                if (userType === 'hod') {
+                                    try {
+                                        const payload = decodeJwtPayload(token);
+                                        if (payload) {
+                                            localStorage.setItem('rmc_hod_user', JSON.stringify(payload));
+                                        }
+                                    } catch (e) { /* ignore decode errors */ }
+                                    // also persist hod token under rmc_hod_token for API usage if needed
+                                    try { localStorage.setItem('rmc_hod_token', token); } catch (e) { }
+                                }
+                                // for college admin, optionally store token under its own key
+                                if (userType === 'admin') {
+                                    try { localStorage.setItem('rmc_college_admin_token', token); } catch (e) { }
+                                }
+                            } else {
+                                console.warn('No token field or valid JWT string found in API response:', res);
+                            }
 
-            if (res && res.user) {
-                localStorage.setItem('rmc_user', JSON.stringify(res.user));
-                console.log('User stored:', res.user);
-            } else {
-                var minimalUser = { 
-                    role: userType, 
-                    name: (userType === 'student' ? 'Student User' : userType === 'admin' ? 'College Admin' : 'Department Admin') 
-                };
-                if (userType === 'student') { 
-                    minimalUser.enrollment = payload.enrollment; 
-                    minimalUser.semester = payload.semester;
-                    minimalUser.collegeId = payload.collegeId;
-                }
-                if (userType !== 'student') { 
-                    minimalUser.email = payload.email; 
-                }
-                localStorage.setItem('rmc_user', JSON.stringify(minimalUser));
-                console.log('Minimal user stored:', minimalUser);
-            }
-            window.location.href = 'profile.html';
-        } catch (e) {
-            console.error('Error processing login response:', e);
-            $('#loginError').text('Error processing login response').show();
-            $btn.removeClass('loading').prop('disabled', false);
-            return;
-        }
-    })
-    .fail(function(xhr) {
-        var msg = 'Login failed';
-        if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-        console.error('Login API error:', xhr.responseJSON || xhr);
-        $('#loginError').text(msg).show();
-    })
-    .always(function() { 
-        $btn.removeClass('loading').prop('disabled', false); 
-    });
+                            if (res && res.user) {
+                                // keep storing res.user for student to maintain compatibility
+                                if (userType === 'student') localStorage.setItem('rmc_user', JSON.stringify(res.user));
+                                // also store role-specific user objects if provided
+                                if (userType === 'hod') localStorage.setItem('rmc_hod_user', JSON.stringify(res.user));
+                                if (userType === 'admin') localStorage.setItem('rmc_college_admin_user', JSON.stringify(res.user));
+                                console.log('User stored:', res.user);
+                            } else {
+                                var minimalUser = {
+                                    role: userType,
+                                    name: (userType === 'student' ? 'Student User' : userType === 'admin' ? 'College Admin' : 'Department Admin')
+                                };
+                                if (userType === 'student') {
+                                    minimalUser.enrollment = payload.enrollment;
+                                    minimalUser.semester = payload.semester;
+                                    minimalUser.collegeId = payload.collegeId;
+                                    localStorage.setItem('rmc_user', JSON.stringify(minimalUser));
+
+                                } else if (userType === 'admin') {
+                                    minimalUser.email = payload.email;
+                                    localStorage.setItem('rmc_college_admin_user', JSON.stringify(minimalUser));
+                                }
+                                console.log('Minimal user stored:', minimalUser);
+                            }
+                            // Redirect based on role: students -> profile, hod -> department admin dashboard, admin -> college admin dashboard
+                            try {
+                                var redirectRole = userType;
+                                if (res && res.user && res.user.role) redirectRole = (res.user.role || userType).toLowerCase();
+                                if (redirectRole === 'student') {
+                                    window.location.href = 'profile.html';
+                                } else if (redirectRole === 'hod') {
+                                    window.location.href = 'admin-dashboard.html';
+                                } else if (redirectRole === 'admin' || redirectRole === 'college-admin') {
+                                    window.location.href = 'college-admin-dashboard.html';
+                                } else {
+                                    // default
+                                    window.location.href = 'profile.html';
+                                }
+                            } catch (e) {
+                                console.error('Redirect error:', e);
+                                window.location.href = 'profile.html';
+                            }
+                        } catch (e) {
+                            console.error('Error processing login response:', e);
+                            $('#loginError').text('Error processing login response').show();
+                            $btn.removeClass('loading').prop('disabled', false);
+                            return;
+                        }
+                    })
+                    .fail(function (xhr) {
+                        var msg = 'Login failed';
+                        if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                        console.error('Login API error:', xhr.responseJSON || xhr);
+                        $('#loginError').text(msg).show();
+                    })
+                    .always(function () {
+                        $btn.removeClass('loading').prop('disabled', false);
+                    });
             });
 
             // Form input focus effects
-            $('.form-group input, .form-group select').on('focus', function() {
+            $('.form-group input, .form-group select').on('focus', function () {
                 $(this).parent().addClass('focused');
-            }).on('blur', function() {
+            }).on('blur', function () {
                 $(this).parent().removeClass('focused');
             });
         });
     </script>
 </body>
+
 </html>

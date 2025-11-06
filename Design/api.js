@@ -23,16 +23,48 @@ window.API = (function () {
     }
 
 
-    // Attach bearer token automatically for non-GET requests only
-    $.ajaxSetup({
-        beforeSend: function (xhr, settings) {
-            var method = (settings && (settings.type || settings.method) || 'GET').toUpperCase();
-            if (method !== 'GET') {
-                var token = localStorage.getItem('rmc_token');
-                if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            }
+    // Helper to get the appropriate token based on endpoint
+    function getAuthToken(url) {
+        if (url.includes('/auth/student') || url.includes('/api/students')) {
+            return localStorage.getItem('rmc_token'); // Keep student token as is
+        } else if (url.includes('/auth/hod') || url.includes('/api/departments')) {
+            return localStorage.getItem('rmc_hod_token');
+        } else if (url.includes('/auth/admin') || url.includes('/api/colleges')) {
+            return localStorage.getItem('rmc_college_admin_token');
         }
-    });
+        // Try all tokens in order of precedence
+        return localStorage.getItem('rmc_token') ||
+            localStorage.getItem('rmc_hod_token') ||
+            localStorage.getItem('rmc_college_admin_token');
+    }
+
+
+    function decodeJwtPayload(token) {
+        try {
+            const parts = token.split('.');
+            if (parts.length < 2) return null;
+            let payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            while (payload.length % 4) payload += '=';
+            const decoded = atob(payload);
+            const json = decodeURIComponent(decoded.split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(json);
+        } catch (e) {
+            return null;
+        }
+    }
+    // Attach bearer token automatically for non-GET requests only
+    // $.ajaxSetup({
+    //     beforeSend: function (xhr, settings) {
+    //         var method = (settings && (settings.type || settings.method) || 'GET').toUpperCase();
+    //         if (method !== 'GET') {
+    //             var token = getAuthToken(settings.url || '');
+    //            console.log('Using token for ' + settings.type + ': ' + decodeJwtPayload(token));
+    //             if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+    //         }
+    //     }
+    // });
 
     function setBaseUrl(url) {
         BASE_URL = url;
@@ -137,7 +169,7 @@ window.API = (function () {
             url: url,
             method: 'GET'
         }).then(function (student) {
-            console.log('Fetched student profile from api:', student);
+
             if (!student) {
                 return $.Deferred().reject('Student not found').promise();
             }

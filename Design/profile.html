@@ -71,18 +71,9 @@
                 var user = JSON.parse(localStorage.getItem('rmc_user') || '{}');
                 var role = (user.role || 'student').toLowerCase();
 
-                // Redirect non-students to their dashboards (placeholders)
-                // if (role !== 'student') {
-                //     if (role === 'admin') {
-                //         // College admin dashboard (create admin-dashboard.html separately)
-                //         window.location.href = 'admin-dashboard.html';
-                //         return;
-                //     } else {
-                //         // Department/HOD dashboard (create hod-dashboard.html separately)
-                //         window.location.href = 'hod-dashboard.html';
-                //         return;
-                //     }
-                // }
+
+
+
 
                 // At this point the user is a student — render student-only profile
                 var name = user.name || 'Student User';
@@ -100,7 +91,7 @@
                 if (user.enrollment) {
                     API.getStudentProfile(user.enrollment)
                         .done(function (studentData) {
-                            console.log("Fetched student data:", studentData);
+
                             // Update the profile with data from database
                             renderStudentDetails(studentData);
                         })
