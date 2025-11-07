@@ -111,10 +111,16 @@ $(function () {
             showModal(`
                 <h3><i class="fas fa-building"></i> Edit Department</h3>
                 <form id="deptForm" class="modal-form">
+                    <div class="form-error" id="m_error" style="color:#b00020;margin-bottom:10px"></div>
+                    
                     <label>Name</label>
-                        <input id="m_name" value="${dept.deptName || dept.name || ''}" required pattern="[A-Za-z ]+" title="Only letters and spaces allowed">
+                    <input id="m_name" value="${dept.deptName || dept.name || ''}" required pattern="[A-Za-z ]+" title="Only letters and spaces allowed">
+                    <div class="field-error" id="m_err_name" style="color:#b00020;font-size:12px;margin-top:-8px"></div>
+                    
                     <label>Description</label>
                     <input id="m_desc" value="${dept.desc || dept.shortDesc || ''}">
+                    <div class="field-error" id="m_err_desc" style="color:#b00020;font-size:12px;margin-top:-8px"></div>
+                    
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">Save</button>
                     </div>
@@ -122,16 +128,39 @@ $(function () {
             `);
             $('#deptForm').on('submit', e => {
                 e.preventDefault();
+
+                // Clear previous errors
+                clearDepartmentFieldErrors();
+
+                // Get and validate form values
+                const vals = getDepartmentFormValues();
+                const errs = validateDepartmentValues(vals);
+
+                if (errs.length) {
+                    showDepartmentFieldErrors(errs);
+                    return;
+                }
+
                 const payload = {
-                    deptName: $('#m_name').val().trim(),
-                    desc: $('#m_desc').val().trim(),
+                    deptName: vals.deptName,
+                    desc: vals.desc,
                     collegeId: user.collegeId
                 };
 
                 updateDepartment(payload).then(() => {
                     hideModal();
                     loadOverview();
-                }).fail(() => alert('Update failed'));
+                }).fail((xhr) => {
+                    let msg = 'Update failed';
+                    try {
+                        if (xhr && xhr.responseJSON) {
+                            msg = xhr.responseJSON.message || JSON.stringify(xhr.responseJSON.errors || xhr.responseJSON);
+                        } else if (xhr && xhr.responseText) {
+                            msg = xhr.responseText;
+                        }
+                    } catch (e) { }
+                    $('#m_error').html(`<div>${msg}</div>`);
+                });
             });
         });
     });
@@ -220,6 +249,111 @@ $(function () {
         return errors;
     }
 
+    // ========== TEACHER VALIDATION ==========
+    function getTeacherFormValues() {
+        return {
+            tname: ($('#m_name').val() || '').trim(),
+            temail: ($('#m_email').val() || '').trim(),
+            tmobile: ($('#m_mobile').val() || '').trim(),
+            tsem: ($('#m_sem').val() || '').trim(),
+            role: ($('#m_role').val() || '').trim()
+        };
+    }
+
+    function clearTeacherFieldErrors() {
+        $('.field-error').empty();
+        $('#m_error').empty();
+    }
+
+    function showTeacherFieldErrors(errors) {
+        clearTeacherFieldErrors();
+        errors.forEach(err => {
+            if (err.includes('Name')) $('#m_err_name').text(err);
+            else if (err.includes('Email')) $('#m_err_email').text(err);
+            else if (err.includes('Mobile')) $('#m_err_mobile').text(err);
+            else if (err.includes('Semester')) $('#m_err_sem').text(err);
+            else if (err.includes('Role')) $('#m_err_role').text(err);
+            else $('#m_error').append(`<div>${err}</div>`);
+        });
+    }
+
+    function validateTeacherValues(vals) {
+        const errors = [];
+        if (!vals.tname) errors.push('Name is required.');
+        if (!vals.temail) errors.push('Email is required.');
+        if (!vals.tmobile) errors.push('Mobile number is required.');
+        if (!vals.tsem) errors.push('Semester is required.');
+        if (!vals.role) errors.push('Role is required.');
+
+        if (vals.tname && !/^[A-Za-z\s]+$/.test(vals.tname)) errors.push('Name must contain only letters and spaces.');
+        if (vals.tmobile && !/^\d{10}$/.test(vals.tmobile)) errors.push('Mobile number must be exactly 10 digits.');
+        if (vals.temail && !/^\S+@\S+\.\S+$/.test(vals.temail)) errors.push('Email address is not valid.');
+        if (vals.tsem && !/^\d+$/.test(vals.tsem)) errors.push('Semester must be a positive integer.');
+
+        return errors;
+    }
+
+    // ========== DEPARTMENT VALIDATION ==========
+    function getDepartmentFormValues() {
+        return {
+            deptName: ($('#m_name').val() || '').trim(),
+            desc: ($('#m_desc').val() || '').trim()
+        };
+    }
+
+    function clearDepartmentFieldErrors() {
+        $('.field-error').empty();
+        $('#m_error').empty();
+    }
+
+    function showDepartmentFieldErrors(errors) {
+        clearDepartmentFieldErrors();
+        errors.forEach(err => {
+            if (err.includes('Name') || err.includes('Department')) $('#m_err_name').text(err);
+            else if (err.includes('Description')) $('#m_err_desc').text(err);
+            else $('#m_error').append(`<div>${err}</div>`);
+        });
+    }
+
+    function validateDepartmentValues(vals) {
+        const errors = [];
+        if (!vals.deptName) errors.push('Department Name is required.');
+        if (vals.deptName && !/^[A-Za-z\s]+$/.test(vals.deptName)) errors.push('Department Name must contain only letters and spaces.');
+        return errors;
+    }
+
+    // ========== COURSE VALIDATION ==========
+    function getCourseFormValues() {
+        return {
+            cName: ($('#m_name').val() || '').trim(),
+            cDuration: ($('#m_duration').val() || '').trim(),
+            cSince: ($('#m_since').val() || '').trim()
+        };
+    }
+
+    function clearCourseFieldErrors() {
+        $('.field-error').empty();
+        $('#m_error').empty();
+    }
+
+    function showCourseFieldErrors(errors) {
+        clearCourseFieldErrors();
+        errors.forEach(err => {
+            if (err.includes('Name') || err.includes('Course')) $('#m_err_name').text(err);
+            else if (err.includes('Duration')) $('#m_err_duration').text(err);
+            else if (err.includes('Since') || err.includes('Year')) $('#m_err_since').text(err);
+            else $('#m_error').append(`<div>${err}</div>`);
+        });
+    }
+
+    function validateCourseValues(vals) {
+        const errors = [];
+        if (!vals.cName) errors.push('Course Name is required.');
+        if (vals.cName && !/^[A-Za-z\s]+$/.test(vals.cName)) errors.push('Course Name must contain only letters and spaces.');
+        if (vals.cDuration && !/^\d+$/.test(vals.cDuration)) errors.push('Duration must be a positive number (years).');
+        if (vals.cSince && !/^\d{4}$/.test(vals.cSince)) errors.push('Since Year must be a 4-digit year.');
+        return errors;
+    }
 
 
 
@@ -323,11 +457,15 @@ $(function () {
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
                 </select>
+                <div class="field-error" id="m_err_gender" style="color:#b00020;font-size:12px;margin-top:-8px"></div>
+                
                 <label>Course</label>
                 <select id="m_course">
                     <option value="">Select course</option>
                     ${courseOptions}
                 </select>
+                <div class="field-error" id="m_err_course" style="color:#b00020;font-size:12px;margin-top:-8px"></div>
+                
                 <label>Photo</label>
                 <input type="file" id="m_image" accept="image/*">
                 <div class="form-actions"><button type="submit" class="btn-primary">Save</button></div>
@@ -594,20 +732,43 @@ $(function () {
         showModal(`
             <h3><i class="fas fa-book"></i> Add Course</h3>
             <div class="modal-form">
-                <label>Name</label><input id="m_name">
-                <label>Duration</label><input id="m_duration">
-                <label>Since</label><input id="m_since">
+                <div class="form-error" id="m_error" style="color:#b00020;margin-bottom:10px"></div>
+                
+                <label>Name</label>
+                <input id="m_name" required>
+                <div class="field-error" id="m_err_name" style="color:#b00020;font-size:12px;margin-top:-8px"></div>
+                
+                <label>Duration (Years)</label>
+                <input id="m_duration" type="number" min="1">
+                <div class="field-error" id="m_err_duration" style="color:#b00020;font-size:12px;margin-top:-8px"></div>
+                
+                <label>Since (Year)</label>
+                <input id="m_since" type="number" min="1900" max="2100" placeholder="e.g., 2020">
+                <div class="field-error" id="m_err_since" style="color:#b00020;font-size:12px;margin-top:-8px"></div>
+                
                 <div class="form-actions"><button id="saveCourse" class="btn-primary">Save</button></div>
             </div>
         `);
 
 
         $('#saveCourse').on('click', () => {
+            // Clear previous errors
+            clearCourseFieldErrors();
+
+            // Get and validate form values
+            const vals = getCourseFormValues();
+            const errs = validateCourseValues(vals);
+
+            if (errs.length) {
+                showCourseFieldErrors(errs);
+                return;
+            }
+
             // Match server-side Course entity property names: cName, cDuration, cSince
             const data = {
-                cName: $('#m_name').val(),
-                cDuration: Number($('#m_duration').val()) || null,
-                cSince: Number($('#m_since').val()) || null,
+                cName: vals.cName,
+                cDuration: vals.cDuration ? Number(vals.cDuration) : null,
+                cSince: vals.cSince ? Number(vals.cSince) : null,
                 department: {
                     deptId: Number(deptId)
                 },
@@ -622,6 +783,17 @@ $(function () {
                 contentType: 'application/json',
                 headers: headers
             }).done(() => { hideModal(); loadCourses(); })
+                .fail((xhr) => {
+                    let msg = 'Failed to add course';
+                    try {
+                        if (xhr && xhr.responseJSON) {
+                            msg = xhr.responseJSON.message || JSON.stringify(xhr.responseJSON.errors || xhr.responseJSON);
+                        } else if (xhr && xhr.responseText) {
+                            msg = xhr.responseText;
+                        }
+                    } catch (e) { }
+                    $('#m_error').html(`<div>${msg}</div>`);
+                });
         });
     });
 
@@ -630,9 +802,20 @@ $(function () {
         $.get(`${baseUrl}/api/courses/${id}`).done(c => {
             // Render modal with inputs, then populate values with jQuery to avoid template interpolation issues
             showModal(`<h3>Edit Course</h3><div class="modal-form">
-                <label>Name</label><input id="m_name">
-                <label>Duration</label><input id="m_duration">
-                <label>Since</label><input id="m_since">
+                <div class="form-error" id="m_error" style="color:#b00020;margin-bottom:10px"></div>
+                
+                <label>Name</label>
+                <input id="m_name" required>
+                <div class="field-error" id="m_err_name" style="color:#b00020;font-size:12px;margin-top:-8px"></div>
+                
+                <label>Duration (Years)</label>
+                <input id="m_duration" type="number" min="1">
+                <div class="field-error" id="m_err_duration" style="color:#b00020;font-size:12px;margin-top:-8px"></div>
+                
+                <label>Since (Year)</label>
+                <input id="m_since" type="number" min="1900" max="2100">
+                <div class="field-error" id="m_err_since" style="color:#b00020;font-size:12px;margin-top:-8px"></div>
+                
                 <div class="form-actions"><button id="updCourse" class="btn-primary">Update</button></div>
             </div>`);
 
@@ -646,17 +829,39 @@ $(function () {
             }
 
             $('#updCourse').off('click').on('click', () => {
+                // Clear previous errors
+                clearCourseFieldErrors();
+
+                // Get and validate form values
+                const vals = getCourseFormValues();
+                const errs = validateCourseValues(vals);
+
+                if (errs.length) {
+                    showCourseFieldErrors(errs);
+                    return;
+                }
+
                 const payload = {
-                    cName: $('#m_name').val(),
-                    cDuration: Number($('#m_duration').val()) || null,
-                    cSince: Number($('#m_since').val()) || null,
+                    cName: vals.cName,
+                    cDuration: vals.cDuration ? Number(vals.cDuration) : null,
+                    cSince: vals.cSince ? Number(vals.cSince) : null,
                     // keep department/college unchanged on update; backend will validate ownership
                     department: { deptId: Number(deptId) },
                     college: { cid: Number(user.collegeId) }
                 };
                 $.ajax({ url: `${baseUrl}/api/courses/${id}`, method: 'PUT', data: JSON.stringify(payload), contentType: 'application/json', headers: headers })
                     .done(() => { hideModal(); loadCourses(); })
-                    .fail(() => alert('Failed to update'));
+                    .fail((xhr) => {
+                        let msg = 'Failed to update';
+                        try {
+                            if (xhr && xhr.responseJSON) {
+                                msg = xhr.responseJSON.message || JSON.stringify(xhr.responseJSON.errors || xhr.responseJSON);
+                            } else if (xhr && xhr.responseText) {
+                                msg = xhr.responseText;
+                            }
+                        } catch (e) { }
+                        $('#m_error').html(`<div>${msg}</div>`);
+                    });
             });
         }).fail(() => alert('Failed to fetch course'));
     });
@@ -735,11 +940,15 @@ $(function () {
                     const $cell = $(`#teachersTable tbody tr[data-id="${id}"] .teacher-courses`);
                     if (!$cell || $cell.length === 0) return;
                     if (Array.isArray(courses) && courses.length > 0) {
-                        const html = courses.map(cn => `
-                            <span class="course-badge" data-course-name="${cn}" style="display:inline-block;background:#eef;padding:4px 8px;border-radius:12px;margin:2px;font-size:12px">
-                                ${cn}
+                        const html = courses.map(c => {
+                            const courseName = c.courseName || c.cName || c.name || c;
+                            const courseId = c.courseId || c.c_id || c.id || '';
+                            return `
+                            <span class="course-badge" data-course-name="${courseName}" data-course-id="${courseId}" style="display:inline-block;background:#eef;padding:4px 8px;border-radius:12px;margin:2px;font-size:12px">
+                                ${courseName}
                                 <i class="fas fa-times remove-course" title="Remove course" style="margin-left:6px;cursor:pointer;color:#900;font-size:11px"></i>
-                            </span>`).join(' ');
+                            </span>`;
+                        }).join(' ');
                         $cell.html(html);
                     } else {
                         $cell.html('<span class="no-courses" style="color:#666;font-size:12px">—</span>');
@@ -808,19 +1017,38 @@ $(function () {
 
         $('#addTeacherForm').off('submit').on('submit', function (e) {
             e.preventDefault();
-            $('#m_error').empty();
+
+            // Clear previous errors
+            clearTeacherFieldErrors();
 
             // pick role: custom if Other
-            let roleVal = $('#m_role').val() || null;
+            let roleVal = $('#m_role').val() || '';
             if (roleVal === 'Other') {
                 const custom = ($('#m_role_other').val() || '').trim();
-                if (custom) roleVal = custom;
+                if (custom) {
+                    roleVal = custom;
+                } else {
+                    // User selected "Other" but didn't provide custom role
+                    roleVal = ''; // Make it empty so validation catches it
+                }
+            }
+
+            // Get and validate form values
+            const vals = getTeacherFormValues();
+            vals.role = roleVal; // override with processed role
+            const errs = validateTeacherValues(vals);
+
+            if (errs.length) {
+                showTeacherFieldErrors(errs);
+                return;
             }
 
             const teacherObj = {
-                tname: ($('#m_name').val() || '').trim() || null,
-                tsem: Number($('#m_sem').val()) || null,
-                role: roleVal || null,
+                tname: vals.tname || null,
+                temail: vals.temail || null,
+                tmobile: vals.tmobile || null,
+                tsem: Number(vals.tsem) || null,
+                role: vals.role || null,
                 college: { cid: Number(user.collegeId) },
                 department: { deptId: Number(deptId) }
             };
@@ -918,19 +1146,38 @@ $(function () {
             // handle edit teacher form submit (no image in edit form)
             $('#editTeacherForm').off('submit').on('submit', function (ev) {
                 ev.preventDefault();
+
+                // Clear previous errors
+                clearTeacherFieldErrors();
+
                 // determine role value
-                let roleVal = $('#m_role').val() || null;
+                let roleVal = $('#m_role').val() || '';
                 if (roleVal === 'Other') {
                     const custom = ($('#m_role_other').val() || '').trim();
-                    if (custom) roleVal = custom;
+                    if (custom) {
+                        roleVal = custom;
+                    } else {
+                        // User selected "Other" but didn't provide custom role
+                        roleVal = ''; // Make it empty so validation catches it
+                    }
+                }
+
+                // Get and validate form values
+                const vals = getTeacherFormValues();
+                vals.role = roleVal; // override with processed role
+                const errs = validateTeacherValues(vals);
+
+                if (errs.length) {
+                    showTeacherFieldErrors(errs);
+                    return;
                 }
 
                 const teacherObj = {
-                    tname: ($('#m_name').val() || '').trim() || null,
-                    temail: ($('#m_email').val() || '').trim() || null,
-                    tmobile: ($('#m_mobile').val() || '').trim() || null,
-                    tsem: Number($('#m_sem').val()) || null,
-                    role: roleVal || null,
+                    tname: vals.tname || null,
+                    temail: vals.temail || null,
+                    tmobile: vals.tmobile || null,
+                    tsem: Number(vals.tsem) || null,
+                    role: vals.role || null,
                     college: { cid: Number(user.collegeId) },
                     department: { deptId: Number(deptId) }
                 };
@@ -1054,6 +1301,7 @@ $(function () {
         const $btn = $(this);
         const $badge = $btn.closest('.course-badge');
         const courseName = ($badge.data('course-name') || '').toString().trim();
+        const courseId = $badge.data('course-id');
         const $tr = $btn.closest('tr');
         const teacherId = $tr.data('id');
 
@@ -1062,56 +1310,29 @@ $(function () {
             return;
         }
 
-        // helper to find course id from allCourses map
-        const findCourseIdByName = (name) => {
-            if (!name) return null;
-            for (const k in allCourses) {
-                if (Object.prototype.hasOwnProperty.call(allCourses, k)) {
-                    try {
-                        if ((allCourses[k] || '').toString().trim() === name) return Number(k);
-                    } catch (e) { }
-                }
-            }
-            return null;
-        };
+        if (!courseId) {
+            alert('Unable to determine course id for "' + courseName + '"');
+            return;
+        }
 
-        const doDelete = (courseId) => {
-            if (!courseId) {
-                alert('Unable to determine course id for "' + courseName + '"');
-                return;
-            }
-            if (!confirm('Remove course "' + courseName + '" from this teacher?')) return;
+        if (!confirm('Remove course "' + courseName + '" from this teacher?')) return;
 
-            $.ajax({
-                url: `${baseUrl}/api/teachers/${teacherId}/courses`,
-                method: 'DELETE',
-                contentType: 'application/json',
-                data: JSON.stringify({ c_id: courseId }),
-                headers: headers
-            }).done(() => {
-                // remove badge from UI
-                $badge.remove();
-            }).fail((xhr) => {
-                const msg = xhr?.responseJSON?.message || xhr?.responseText || 'Failed to remove course';
-                alert(msg);
-            });
-        };
 
-        // Try to find id from in-memory map first, otherwise fetch department courses
-        let cid = findCourseIdByName(courseName);
-        if (cid) return doDelete(cid);
 
-        // fetch department courses as fallback to determine id
-        $.ajax({ url: `${baseUrl}/api/courses/department/${deptId}`, method: 'GET', headers: headers })
-            .done(courses => {
-                (Array.isArray(courses) ? courses : []).forEach(c => {
-                    const id = c.c_id || c._id || c.cId;
-                    const name = c.cName || c.courseName || c.name || '';
-                    if (id) allCourses[id] = name;
-                });
-                cid = findCourseIdByName(courseName);
-                doDelete(cid);
-            }).fail(() => alert('Failed to fetch courses to determine course id'));
+        $.ajax({
+            url: `${baseUrl}/api/teachers/${teacherId}/courses`,
+            method: 'DELETE',
+            contentType: 'application/json',
+            data: JSON.stringify({ c_id: Number(courseId) }),
+            headers: headers
+        }).done(() => {
+            // remove badge from UI
+            $badge.remove();
+        }).fail((xhr) => {
+            console.error('DELETE course failed:', xhr.status, xhr.responseText);
+            const msg = xhr?.responseJSON?.message || xhr?.responseText || 'Failed to remove course';
+            alert(msg);
+        });
     });
 
     // Click handler for teacher photo edit overlay

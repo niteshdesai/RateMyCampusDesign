@@ -89,9 +89,6 @@ window.API = (function () {
             queryParams.push('collegeId=' + encodeURIComponent(payload.collegeId));
             console.log('College ID for student login:', payload.collegeId);
         }
-        if (payload && payload.role) {
-            queryParams.push('role=' + encodeURIComponent(payload.role));
-        }
         if (queryParams.length > 0) {
             url += '?' + queryParams.join('&');
         }
@@ -114,9 +111,6 @@ window.API = (function () {
         if (payload && payload.password) {
             queryParams.push('password=' + encodeURIComponent(payload.password));
         }
-        if (payload && payload.role) {
-            queryParams.push('role=' + encodeURIComponent(payload.role));
-        }
         if (queryParams.length > 0) {
             url += '?' + queryParams.join('&');
         }
@@ -138,9 +132,6 @@ window.API = (function () {
         }
         if (payload && payload.password) {
             queryParams.push('password=' + encodeURIComponent(payload.password));
-        }
-        if (payload && payload.role) {
-            queryParams.push('role=' + encodeURIComponent(payload.role));
         }
         if (queryParams.length > 0) {
             url += '?' + queryParams.join('&');

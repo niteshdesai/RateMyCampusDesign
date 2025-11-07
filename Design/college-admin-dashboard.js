@@ -9,6 +9,16 @@ $(function () {
     }
     console.log('Using headers:', headers);
     console.log('College ID:', collegeId);
+    console.log('User data:', user);
+
+    // Check if collegeId exists, if not show error
+    if (!collegeId) {
+        console.error('No collegeId found! User data:', user);
+        alert('College ID not found. Please login again.');
+        // Optionally redirect to login
+        // location.href = 'login.html';
+        // return;
+    }
 
     $('.user-name').text(user.name || 'College Admin');
     if (user.caImg) {
@@ -51,6 +61,9 @@ $(function () {
         if (e.target === e.currentTarget) hideModal();
     });
 
+    // Ensure modal is hidden on page load
+    $('#modalOverlay').hide();
+
     // AJAX Helper
     const tryAjax = (paths, opts) => new Promise((resolve, reject) => {
         let i = 0;
@@ -64,14 +77,30 @@ $(function () {
 
     // ---------- OVERVIEW ----------
     function loadOverview() {
-        if (!collegeId) return;
+        if (!collegeId) {
+
+            console.warn('Cannot load overview: collegeId is missing');
+            $('#stat-departments .value').text('--');
+            $('#stat-hods .value').text('--');
+            $('#stat-students .value').text('--');
+            $('#collegeNameDisplay').text('--');
+            $('#collegeDescDisplay').text('--');
+            $('#collegeAddressDisplay').text('--');
+            $('#collegeCityDisplay').text('--');
+            $('#collegeStateDisplay').text('--');
+            $('#collegePincodeDisplay').text('--');
+            return;
+        }
 
         // Load stats and college details
         Promise.all([
-            tryAjax([{ url: `${baseUrl}/api/departments/college/${collegeId}` }], { headers }),
-            tryAjax([{ url: `${baseUrl}/api/departmentadmins/college/${collegeId}` }], { headers }),
-            tryAjax([{ url: `${baseUrl}/api/colleges/${collegeId}` }], { headers })
+            tryAjax([{ url: `${baseUrl}/api/colleges/${collegeId}/departments` }]),
+            tryAjax([{ url: `${baseUrl}/api/departmentadmins/college/${collegeId}` }]),
+            tryAjax([{ url: `${baseUrl}/api/colleges/${collegeId}` }])
         ]).then(([departments, hods, college]) => {
+            console.log("department:", departments);
+            console.log("hod", hod);
+            console.log("college", college);
             $('#stat-departments .value').text((Array.isArray(departments) ? departments : []).length);
             $('#stat-hods .value').text((Array.isArray(hods) ? hods : []).length);
 
@@ -100,9 +129,13 @@ $(function () {
             } else {
                 $('#stat-students .value').text(0);
             }
-        }).catch(() => {
+        }).catch((err) => {
+            console.error('Failed to load overview:', err);
             $('#collegeNameDisplay').text('--');
             $('#collegeDescDisplay').text('--');
+            $('#stat-departments .value').text('--');
+            $('#stat-hods .value').text('--');
+            $('#stat-students .value').text('--');
         });
     }
 

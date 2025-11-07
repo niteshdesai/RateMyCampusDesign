@@ -171,8 +171,7 @@
                     payload = {
                         enrollment: $('#enrollment').val(),
                         semester: Number($('#semester').val()),
-                        collegeId: $('#college').val(),
-                        role: 'student'
+                        collegeId: $('#college').val()
                     };
                     // Basic required validation for student fields
                     if (!payload.enrollment || !payload.semester || !payload.collegeId) {
@@ -181,9 +180,9 @@
                         return;
                     }
                 } else if (userType === 'admin') {
-                    payload = { email: $('#adminEmail').val(), password: $('#adminPassword').val(), role: 'admin' };
+                    payload = { email: $('#adminEmail').val(), password: $('#adminPassword').val() };
                 } else if (userType === 'hod') {
-                    payload = { email: $('#hodEmail').val(), password: $('#hodPassword').val(), role: 'hod' };
+                    payload = { email: $('#hodEmail').val(), password: $('#hodPassword').val() };
                 }
 
                 // Call backend per role
@@ -193,79 +192,70 @@
 
                 loginCall
                     .done(function (res) {
-                        console.log('Full API Response:', JSON.stringify(res, null, 2)); // Log the entire response
                         try {
-                            // normalize token value (either raw string or res.token)
+                            // Clear any previous errors
+                            $('#loginError').hide();
+
+                            // Normalize token value (either raw string or res.token)
                             const token = (typeof res === 'string' && res.includes('.')) ? res : (res && res.token ? res.token : null);
-                            if (token) {
-                                // keep existing student behavior (rmc_token)
-                                if (userType === 'student') {
-                                    localStorage.setItem('rmc_token', token);
+
+                            // Check if token is null or undefined
+                            if (!token) {
+                                console.error('No token received from server');
+                                var errorMsg = 'Authentication failed: No token received';
+
+                                // Check for server error message
+                                if (res && res.message) {
+                                    errorMsg = res.message;
+                                } else if (res && res.error) {
+                                    errorMsg = res.error;
                                 }
-                                // for HOD, store the full JWT payload into rmc_hod_user and also keep token if desired
-                                if (userType === 'hod') {
-                                    try {
-                                        const payload = decodeJwtPayload(token);
-                                        if (payload) {
-                                            localStorage.setItem('rmc_hod_user', JSON.stringify(payload));
-                                        }
-                                    } catch (e) { /* ignore decode errors */ }
-                                    // also persist hod token under rmc_hod_token for API usage if needed
-                                    try { localStorage.setItem('rmc_hod_token', token); } catch (e) { }
-                                }
-                                // for college admin, optionally store token under its own key
-                                if (userType === 'admin') {
-                                    try { localStorage.setItem('rmc_college_admin_token', token); } catch (e) { }
-                                }
-                            } else {
-                                console.warn('No token field or valid JWT string found in API response:', res);
+
+                                $('#loginError').text(errorMsg).show();
+                                $btn.removeClass('loading').prop('disabled', false);
+                                return; // Stop execution - don't redirect
                             }
 
-                            if (res && res.user) {
-                                // keep storing res.user for student to maintain compatibility
-                                if (userType === 'student') localStorage.setItem('rmc_user', JSON.stringify(res.user));
-                                // also store role-specific user objects if provided
-                                if (userType === 'hod') localStorage.setItem('rmc_hod_user', JSON.stringify(res.user));
-                                if (userType === 'admin') localStorage.setItem('rmc_college_admin_user', JSON.stringify(res.user));
-                                console.log('User stored:', res.user);
-                            } else {
-                                var minimalUser = {
-                                    role: userType,
-                                    name: (userType === 'student' ? 'Student User' : userType === 'admin' ? 'College Admin' : 'Department Admin')
-                                };
-                                if (userType === 'student') {
-                                    minimalUser.enrollment = payload.enrollment;
-                                    minimalUser.semester = payload.semester;
-                                    minimalUser.collegeId = payload.collegeId;
-                                    localStorage.setItem('rmc_user', JSON.stringify(minimalUser));
-
-                                } else if (userType === 'admin') {
-                                    minimalUser.email = payload.email;
-                                    localStorage.setItem('rmc_college_admin_user', JSON.stringify(minimalUser));
-                                }
-                                console.log('Minimal user stored:', minimalUser);
+                            // Decode JWT payload
+                            const jwtPayload = decodeJwtPayload(token);
+                            if (!jwtPayload) {
+                                console.error('Failed to decode JWT token');
+                                $('#loginError').text('Authentication failed: Invalid token format').show();
+                                $btn.removeClass('loading').prop('disabled', false);
+                                return; // Stop execution - don't redirect
                             }
-                            // Redirect based on role: students -> profile, hod -> department admin dashboard, admin -> college admin dashboard
-                            try {
-                                var redirectRole = userType;
-                                if (res && res.user && res.user.role) redirectRole = (res.user.role || userType).toLowerCase();
-                                if (redirectRole === 'student') {
-                                    window.location.href = 'profile.html';
-                                } else if (redirectRole === 'hod') {
-                                    window.location.href = 'admin-dashboard.html';
-                                } else if (redirectRole === 'admin' || redirectRole === 'college-admin') {
-                                    window.location.href = 'college-admin-dashboard.html';
-                                } else {
-                                    // default
-                                    window.location.href = 'profile.html';
-                                }
-                            } catch (e) {
-                                console.error('Redirect error:', e);
+
+                            console.log('JWT Payload:', jwtPayload);
+
+                            // Store token and JWT payload based on user type
+                            if (userType === 'student') {
+                                localStorage.setItem('rmc_token', token);
+                                localStorage.setItem('rmc_user', JSON.stringify(jwtPayload));
+                                console.log('Student data stored from JWT:', jwtPayload);
+                            } else if (userType === 'hod') {
+                                localStorage.setItem('rmc_hod_token', token);
+                                localStorage.setItem('rmc_hod_user', JSON.stringify(jwtPayload));
+                                console.log('HOD data stored from JWT:', jwtPayload);
+                            } else if (userType === 'admin') {
+                                localStorage.setItem('rmc_college_admin_token', token);
+                                localStorage.setItem('rmc_college_admin_user', JSON.stringify(jwtPayload));
+                                console.log('College Admin data stored from JWT:', jwtPayload);
+                            }
+
+                            // Redirect based on role after successful storage
+                            if (userType === 'student') {
+                                window.location.href = 'profile.html';
+                            } else if (userType === 'hod') {
+                                window.location.href = 'admin-dashboard.html';
+                            } else if (userType === 'admin') {
+                                window.location.href = 'college-admin-dashboard.html';
+                            } else {
+                                // default
                                 window.location.href = 'profile.html';
                             }
                         } catch (e) {
                             console.error('Error processing login response:', e);
-                            $('#loginError').text('Error processing login response').show();
+                            $('#loginError').text('Error processing login response: ' + e.message).show();
                             $btn.removeClass('loading').prop('disabled', false);
                             return;
                         }
