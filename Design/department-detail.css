@@ -959,9 +959,9 @@ DEPARTMENT DETAIL PAGE STYLES
 }
 
 /* Custom hover and selected states controlled by JS */
-.star-rating label.hover {
+/* .star-rating label.hover {
     color: #fbbf24;
-}
+} */
 
 .star-rating label.selected {
     color: #fbbf24;

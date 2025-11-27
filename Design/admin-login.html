@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - RateMyCampus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="admin-dashboard.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="api.js"></script>
+</head>
+
+<body>
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar-container"></div>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <section class="login-section">
+            <div class="form-container">
+                <div id="loginError" class="alert" style="display:none;"></div>
+
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <i class="fas fa-user-shield" style="font-size: 4rem; color: var(--primary);"></i>
+                    <h2 style="margin-top: 1rem;">Site Admin Login</h2>
+                    <p style="color: var(--gray-600);">Access the administrative dashboard</p>
+                </div>
+
+                <!-- Admin Login Form -->
+                <form id="adminLoginForm" class="login-form active">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password"
+                            minlength="6" required>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <a href="login.html" style="color: var(--primary); text-decoration: none;">
+                        <i class="fas fa-arrow-left"></i> Back to Student/HOD/College Admin Login
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER COMPONENT -->
+    <div id="footer-container"></div>
+
+    <script>
+        $(function () {
+            // Load navbar and footer
+            $('#navbar-container').load('navbar.html');
+            $('#footer-container').load('footer.html');
+
+            // Check if already logged in
+            const token = localStorage.getItem('rmc_admin_token');
+            if (token) {
+                window.location.href = 'admin-dashboard.html';
+                return;
+            }
+
+            // Handle form submission
+            $('#adminLoginForm').on('submit', function (e) {
+                e.preventDefault();
+
+                const email = $('#email').val().trim();
+                const password = $('#password').val();
+
+                // Validation
+                if (!email || !password) {
+                    showError('Please enter both email and password');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showError('Password must be at least 6 characters long');
+                    return;
+                }
+
+                // Show loading state
+                const $submitBtn = $(this).find('button[type="submit"]');
+                const originalText = $submitBtn.html();
+                $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Logging in...');
+
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('password', password);
+                console.log(formData.getAll('email'), formData.getAll('password'));
+                // Call API
+                $.ajax({
+                    url: API.getBaseUrl() + '/auth/admin',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        console.log('Login response:', response);
+                        if (response != null) {
+                            // Store token
+                            localStorage.setItem('rmc_admin_token', response);
+
+                            // Store admin info if provided
+
+                            const admin = decodeJwtPayload(response);
+                            console.log('Decoded Admin Info:', admin);
+                            localStorage.setItem('rmc_admin_info', JSON.stringify(admin));
+
+
+                            // Show success message
+                            showSuccess('Login successful! Redirecting...');
+
+                            // Redirect to dashboard
+                            setTimeout(function () {
+                                window.location.href = 'admin-dashboard.html';
+                            }, 100);
+                        } else {
+                            showError('Login failed. Invalid response from server.');
+                            $submitBtn.prop('disabled', false).html(originalText);
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error('Login error:', xhr);
+                        const message = xhr.responseJSON?.message || 'Invalid email or password';
+                        showError(message);
+                        $submitBtn.prop('disabled', false).html(originalText);
+                    }
+                });
+            });
+
+            function showError(message) {
+                $('#loginError')
+                    .removeClass('alert-success')
+                    .addClass('alert-error')
+                    .text(message)
+                    .fadeIn();
+
+                setTimeout(function () {
+                    $('#loginError').fadeOut();
+                }, 5000);
+            }
+
+            function showSuccess(message) {
+                $('#loginError')
+                    .removeClass('alert-error')
+                    .addClass('alert-success')
+                    .text(message)
+                    .fadeIn();
+            }
+        });
+
+        function decodeJwtPayload(token) {
+            try {
+                const parts = token.split('.');
+                if (parts.length < 2) return null;
+                let payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                while (payload.length % 4) payload += '=';
+                const decoded = atob(payload);
+                const json = decodeURIComponent(decoded.split('').map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(json);
+            } catch (e) {
+                return null;
+            }
+        }
+    </script>
+</body>
+
+</html>

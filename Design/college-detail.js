@@ -86,43 +86,43 @@
         fetchCollegeCriteriaRatings(college.cid)
             .then(function (criteriaRatings) {
                 console.log('Criteria Ratings:', criteriaRatings);
-                // Use the returned hashmap values directly
+                function safeNum(v) {
+                    var n = parseFloat(v);
+                    return (isFinite(n)) ? n : 0;
+                }
                 const ratings = {
-                    sports: criteriaRatings.sports_facilities || 0,
-                    extracurricular: criteriaRatings.extracurricular_activities || 0,
-                    campus: criteriaRatings.campus_facilities || 0
+                    sports: safeNum(criteriaRatings.sports_facilities),
+                    extracurricular: safeNum(criteriaRatings.extracurricular_activities),
+                    campus: safeNum(criteriaRatings.campus_facilities)
                 };
-                console.log('Parsed Ratings:', ratings);
+                console.log('Parsed Ratings (sanitized):', ratings);
                 // Render sports facilities rating
                 renderStars(ratings.sports, $('.sports-rating'));
                 $('.sports-score').text(ratings.sports.toFixed(1));
-
                 // Render extracurricular activities rating
                 renderStars(ratings.extracurricular, $('.extracurricular-rating'));
                 $('.extracurricular-score').text(ratings.extracurricular.toFixed(1));
-
                 // Render campus facilities rating
                 renderStars(ratings.campus, $('.campus-rating'));
                 $('.campus-score').text(ratings.campus.toFixed(1));
             })
             .catch(function (error) {
                 console.error('Error fetching criteria ratings:', error);
-                // Set default "No ratings yet" message
-                $('.criteria-score').text('N/A');
-                $('.criteria-stars').each(function () {
+                $('.sports-rating, .extracurricular-rating, .campus-rating').each(function () {
                     $(this).empty().append('<span class="no-ratings">No ratings yet</span>');
                 });
+                $('.sports-score, .extracurricular-score, .campus-score').text('N/A');
             });
         var showRate = false;
-        if (user && user.role === 'student' && user.collegeId && String(user.collegeId) === String(college.cid)) {
-
+        var hasStudentToken = !!window.localStorage.getItem('rmc_token');
+        if (hasStudentToken && user && user.collegeId && String(user.collegeId) === String(college.cid)) {
             showRate = true;
         }
-        if (showRate) {
-            $(".action-buttons .btn-primary").show();
-        } else {
-            $(".action-buttons .btn-primary").hide();
+        // Fallback: if enrollment exists assume student & allow rating
+        if (!showRate && hasStudentToken && user && user.enrollment && user.collegeId && String(user.collegeId) === String(college.cid)) {
+            showRate = true;
         }
+        $(".action-buttons .btn-primary").toggle(showRate);
         // Departments & Programs section
         var $departmentsGrid = $(".departments-grid");
         $departmentsGrid.empty();

@@ -244,76 +244,108 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        $(document).ready(function () {
-            // Load navbar component
-            $('#navbar-container').load('navbar.html');
 
-            // Load footer component
+        $(document).ready(function () {
+            // Load navbar & footer
+            $('#navbar-container').load('navbar.html');
             $('#footer-container').load('footer.html');
 
-
-            // Open rating modal from action button
+            // Open rating modal
             $('.action-buttons .btn').on('click', function () {
                 $('#rateCollegeModal').show();
-                // reset stars
-                $('.star-rating label').removeClass('active');
-                $('.star-rating input[type="radio"]').prop('checked', false);
+                // Reset all ratings properly
+                resetAllStarRatings();
             });
 
-            // Close modal handlers
+            // Close modal
             $(document).on('click', '#cancelCollegeRate, #rateCollegeModal .close', function () {
                 $('#rateCollegeModal').hide();
-                $('.star-rating label').removeClass('active');
-                $('.star-rating input[type="radio"]').prop('checked', false);
+                resetAllStarRatings();
             });
 
-            // Close when clicking outside content
+            // Close when clicking outside
             $(window).on('click', function (e) {
                 if (e.target.id === 'rateCollegeModal') {
                     $('#rateCollegeModal').hide();
-                    $('.star-rating label').removeClass('active');
-                    $('.star-rating input[type="radio"]').prop('checked', false);
+                    resetAllStarRatings();
                 }
             });
 
-            // Star rating interaction (left-to-right sequential)
-            $(document).on('click', '#rateCollegeModal .star', function (e) {
-                e.preventDefault();
-                const clickedRating = Number($(this).data('rating'));
-                const starContainer = $(this).closest('.star-rating');
+            // === FIXED STAR RATING LOGIC ===
+            function resetAllStarRatings() {
+                $('#rateCollegeModal .star-rating').each(function () {
+                    $(this).find('label').removeClass('active');
+                    $(this).find('input[type="radio"]').prop('checked', false);
+                });
+            }
 
-                let currentMax = 0;
-                starContainer.find('label').each(function () {
-                    const r = Number($(this).data('rating'));
-                    if ($(this).hasClass('active')) currentMax = Math.max(currentMax, r);
+            // Handle star click - now properly scoped and reliable
+            $(document).on('click', '#rateCollegeModal .star-rating label', function (e) {
+                e.preventDefault();
+                const $label = $(this);
+                const $container = $label.closest('.star-rating');
+                const rating = parseInt($label.data('rating'));
+
+                // Get previously selected
+                const prevRating = $container.find('input:checked').val();
+
+                // If clicking the same star again → deselect all (allow clearing)
+                if (prevRating == rating) {
+                    $container.find('label').removeClass('active');
+                    $container.find('input[type="radio"]').prop('checked', false);
+                    return;
+                }
+
+                // Highlight stars up to clicked one
+                $container.find('label').each(function () {
+                    const r = parseInt($(this).data('rating'));
+                    $(this).toggleClass('active', r <= rating);
                 });
 
-                const renderTo = (newMax) => {
-                    starContainer.find('label').each(function () {
-                        const r = Number($(this).data('rating'));
-                        if (r <= newMax) $(this).addClass('active'); else $(this).removeClass('active');
-                    });
-                    if (newMax > 0) starContainer.find(`input[value="${newMax}"]`).prop('checked', true);
-                    else starContainer.find('input[type="radio"]').prop('checked', false);
-                };
-
-                if (clickedRating === currentMax + 1) { renderTo(clickedRating); return; }
-                if (clickedRating === currentMax) { renderTo(currentMax - 1); return; }
-                // ignore non-consecutive
+                // Check the radio button
+                $container.find(`input[value="${rating}"]`).prop('checked', true);
             });
 
-            // Submit rating
+            // Optional: Hover effect (nice UX)
+            $(document).onOn('mouseenter', '#rateCollegeModal .star-rating label', function () {
+                const $label = $(this);
+                const $container = $label.closest('.star-rating');
+                const rating = parseInt($label.data('rating'));
+
+                $container.find('label').each(function () {
+                    const r = parseInt($(this).data('rating'));
+                    $(this).toggleClass('hover', r <= rating);
+                });
+            });
+
+            $(document).on('mouseleave', '#rateCollegeModal .star-rating', function () {
+                $(this).find('label').removeClass('hover');
+            });
+
+            // Form submit
             $('#rateCollegeForm').on('submit', function (e) {
                 e.preventDefault();
-                const rating = $('input[name="rating"]:checked', this).val();
-                if (!rating) { alert('Please select a rating'); return; }
 
+                const overall = $('input[name="rating"]:checked').val();
+                const extracurricular = $('input[name="extracurricular"]:checked').val();
+                const sports = $('input[name="sports"]:checked').val();
+                const campus = $('input[name="campus"]:checked').val();
+
+                // Required fields check
+                if (!overall || !extracurricular || !sports || !campus) {
+                    alert('Please provide all required ratings!');
+                    return;
+                }
+
+                // Here you would send to backend
+                console.log('Rating Submitted:', { overall, extracurricular, sports, campus });
+
+                alert('Thank you for your rating!');
                 $('#rateCollegeModal').hide();
-                this.reset();
-                $('.star-rating label').removeClass('active');
+                resetAllStarRatings();
             });
         });
-
+    </script>
 
     </script>
     <script src="api.js"></script>

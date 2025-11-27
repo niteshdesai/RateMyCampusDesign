@@ -242,12 +242,16 @@
                                 url: baseUrl + '/api/teacher-rating-criteria/teacher/' + member.tid,
                                 method: 'GET'
                             }).done(criteria => {
+                                function safeNum(v) {
+                                    var n = parseFloat(v);
+                                    return (isFinite(n)) ? n : 0;
+                                }
                                 var teacherRatings = {
                                     teacherName: member.tname,
                                     overallRating: parseFloat($(`#teacher-rating-${member.tid}`).text()) || 0,
                                     totalRatings: parseInt($(`#teacher-count-${member.tid}`).text().replace(/[()]/g, '')) || 0,
-                                    teachingQuality: criteria?.subject_knowledge || 0,
-                                    communication: criteria?.communication_skills || 0
+                                    teachingQuality: safeNum(criteria?.subject_knowledge),
+                                    communication: safeNum(criteria?.communication_skills)
                                 };
                                 showRatingDetails(teacherRatings);
                             });
@@ -259,7 +263,17 @@
                     $card.append(ratingsSummary);
 
                     var user = getUserFromLocalStorage();
-                    if (user && user.role === 'student' && user.collegeId && String(user.collegeId) === String(member.collegeId)) {
+                    var hasStudentToken = !!window.localStorage.getItem('rmc_token');
+                    // Show button if student token exists and collegeId matches (or enrollment exists as fallback)
+                    var showRateBtn = false;
+                    if (hasStudentToken && user && user.collegeId && String(user.collegeId) === String(member.collegeId)) {
+                        showRateBtn = true;
+                    }
+                    // Fallback: if enrollment exists, assume student
+                    if (!showRateBtn && hasStudentToken && user && user.enrollment && user.collegeId && String(user.collegeId) === String(member.collegeId)) {
+                        showRateBtn = true;
+                    }
+                    if (showRateBtn) {
                         $card.append(`<button class="rate-teacher-btn btn-primary" data-teacher-id="${member.tid}">Rate Teacher</button>`);
                     }
 
@@ -343,6 +357,10 @@
 
     // Function to show rating details in modal
     function showRatingDetails(rating) {
+        function safe(v) {
+            var n = parseFloat(v);
+            return (isFinite(n)) ? n.toFixed(1) : '0.0';
+        }
         const modalContent = `
             <div class="teacher-name">${rating.teacherName}</div>
             <div class="rating-details">
@@ -350,7 +368,7 @@
                     <h4>Overall Rating</h4>
                     <div class="big-rating">
                         <div class="big-stars">${generateStarRating(rating.overallRating)}</div>
-                        <div class="big-number">${rating.overallRating.toFixed(1)}</div>
+                        <div class="big-number">${safe(rating.overallRating)}</div>
                         <div class="rating-total">${rating.totalRatings} total ratings</div>
                     </div>
                 </div>
@@ -362,7 +380,7 @@
                         <div class="criteria-content">
                             <h5>Subject Knowledge</h5>
                             <div class="criteria-rating">${generateStarRating(rating.teachingQuality)}</div>
-                            <div class="criteria-score">${rating.teachingQuality.toFixed(1)}</div>
+                            <div class="criteria-score">${safe(rating.teachingQuality)}</div>
                         </div>
                     </div>
                     <div class="criteria-card">
@@ -372,7 +390,7 @@
                         <div class="criteria-content">
                             <h5>Communication Skills</h5>
                             <div class="criteria-rating">${generateStarRating(rating.communication)}</div>
-                            <div class="criteria-score">${rating.communication.toFixed(1)}</div>
+                            <div class="criteria-score">${safe(rating.communication)}</div>
                         </div>
                     </div>
                 </div>
@@ -511,7 +529,8 @@
             const baseUrl = window.localStorage.getItem('rmc_api_base') || 'http://localhost:8080';
             const user = getUserFromLocalStorage();
 
-            if (!user || user.role !== 'student' || !user.enrollment) {
+
+            if (!user || user.role !== "STUDENT" || !user.enrollment) {
                 return alert('Unable to submit rating: Student enrollment information not found.');
             }
 
@@ -542,6 +561,22 @@
                         return alert('Authentication required. Please log in again.');
                     }
 
+                    // Prepare payloads
+                    const overallRatingPayload = {
+                        score: Number(rating),
+                        teacher: { tid: Number(teacherId) },
+                        student: { sid: Number(studentEnrollment.sid) },
+                        course: { c_id: Number(courseId) }
+                    };
+
+                    const criteriaRatingPayload = {
+                        teacherId: Number(teacherId),
+                        studentId: Number(studentEnrollment.sid),
+                        subjectKnowledge: Number(knowledge),
+                        communicationSkills: Number(communication)
+                    };
+
+
                     // Submit both ratings in parallel
                     Promise.all([
                         // Submit overall rating
@@ -553,12 +588,7 @@
                                 'Accept': 'application/json',
                                 'Authorization': 'Bearer ' + token
                             },
-                            data: JSON.stringify({
-                                score: Number(rating),
-                                teacher: { tid: Number(teacherId) },
-                                student: { sid: Number(studentEnrollment.sid) },
-                                course: { c_id: Number(courseId) }
-                            })
+                            data: JSON.stringify(overallRatingPayload)
                         }),
                         // Submit detailed criteria ratings
                         $.ajax({
@@ -569,32 +599,46 @@
                                 'Accept': 'application/json',
                                 'Authorization': 'Bearer ' + token
                             },
-                            data: JSON.stringify({
-                                teacherId: Number(teacherId),
-                                studentId: Number(studentEnrollment.sid),
-                                subjectKnowledge: Number(knowledge),
-                                communicationSkills: Number(communication)
-                            })
+                            data: JSON.stringify(criteriaRatingPayload)
                         })
-                    ]).then(() => {
-                        $('#teacherRatingModal').hide();
-                        this.reset();
-                        $('.star-rating label').removeClass('active');
-                        alert('Thank you for rating! Your feedback has been submitted.');
-                        // Refresh faculty display
-                        fetchDepartmentFaculty(departmentId, $('.faculty-tab.active').data('course') || 'all');
-                    }).catch(() => alert('Failed to submit one or more ratings.'));
-                }).fail(() => alert('Failed to load enrollment.'));
-            }).fail(() => alert('Failed to load teacher courses.'));
+                    ]).then((responses) => {
 
-            $('#teacherRatingModal').fadeOut(200);
-            setTimeout(() => {
-                // Reset all rating sections
-                ['teacherModalStars', 'communicationSkillsStars', 'subjectKnowledgeStars'].forEach(id => {
-                    $(`#${id} label`).removeClass('active').html('&#9734;');
-                    $(`#${id}-value`).val(0);
+
+                        $('#teacherRatingModal').fadeOut(200);
+                        $('#rateTeacherForm')[0].reset();
+                        $('.star-rating label').removeClass('active');
+
+                        setTimeout(() => {
+                            alert('Thank you for rating! Your feedback has been submitted.');
+                            // Refresh faculty display
+                            fetchDepartmentFaculty(departmentId, $('.faculty-tab.active').data('course') || 'all');
+                        }, 250);
+                    }).catch((error) => {
+                        console.error('❌ Rating submission failed:', error);
+                        console.error('Status:', error.status);
+                        console.error('Response:', error.responseText);
+                        console.error('Full error:', JSON.stringify(error, null, 2));
+
+                        var errorMsg = 'Failed to submit rating. ';
+                        if (error.responseJSON && error.responseJSON.message) {
+                            errorMsg += error.responseJSON.message;
+                        } else if (error.responseText) {
+                            errorMsg += error.responseText;
+                        } else if (error.status === 0) {
+                            errorMsg += 'Network error - check if backend is running.';
+                        } else {
+                            errorMsg += 'Status: ' + error.status;
+                        }
+                        alert(errorMsg);
+                    });
+                }).fail((error) => {
+                    console.error('Failed to load enrollment:', error);
+                    alert('Failed to load enrollment information.');
                 });
-            }, 300);
+            }).fail((error) => {
+                console.error('Failed to load teacher courses:', error);
+                alert('Failed to load teacher courses.');
+            });
         });
 
         var departmentId = getDepartmentIdFromUrl();

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Admin – RateMyCampus</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="departmentAdmin-dashboard.css">
+
+    <!-- jQuery & API -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="api.js"></script>
+</head>
+
+<body>
+    <!-- Top Bar -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <button id="sidebarToggle" class="icon-btn"><i class="fas fa-bars"></i></button>
+            <img src="assets/logo5.png" alt="Logo" class="logo">
+            <h1 class="brand-name">RateMyCampus</h1>
+        </div>
+        <div class="topbar-right">
+            <div class="user-menu">
+                <img src="" alt="Avatar" class="avatar">
+                <span class="user-name">Hod</span>
+                <i class="fas fa-caret-down"></i>
+                <div class="dropdown">
+                    <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="nav">
+                <button class="nav-item active" data-section="overview"><i class="fas fa-home"></i> Overview</button>
+                <button class="nav-item" data-section="students"><i class="fas fa-user-graduate"></i> Students</button>
+                <button class="nav-item" data-section="courses"><i class="fas fa-book"></i> Courses</button>
+                <button class="nav-item" data-section="teachers"><i class="fas fa-chalkboard-teacher"></i>
+                    Teachers</button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Overview Panel -->
+            <section class="panel" id="section-overview">
+                <h2 class="section-title">Dashboard Overview</h2>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card" id="stat-students">
+                        <i class="fas fa-user-graduate icon"></i>
+                        <div class="info">
+                            <h3>Total Students</h3>
+                            <p class="value">--</p>
+                        </div>
+                    </div>
+                    <div class="stat-card" id="stat-courses">
+                        <i class="fas fa-book icon"></i>
+                        <div class="info">
+                            <h3>Total Courses</h3>
+                            <p class="value">--</p>
+                        </div>
+                    </div>
+                    <div class="stat-card" id="stat-teachers">
+                        <i class="fas fa-chalkboard-teacher icon"></i>
+                        <div class="info">
+                            <h3>Total Teachers</h3>
+                            <p class="value">--</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Department Info (below stats) -->
+                <div class="info-card" style="margin-top: 2rem;">
+                    <div class="info-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin:0; font-size:1.125rem; color:var(--gray-900);">
+                            <i class="fas fa-building"></i> Department
+                        </h3>
+                        <button id="editDeptBtn" class="btn-primary"
+                            style="font-size:0.875rem; padding:0.35rem 0.75rem; ">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Name</span>
+                        <p id="deptNameDisplay">--</p>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Description</span>
+                        <p id="deptDescDisplay">--</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Students Panel -->
+            <section class="panel" id="section-students" style="display:none;">
+                <div class="panel-header">
+                    <h2 class="section-title">Students</h2>
+                    <button id="addStudentBtn" class="btn-primary"><i class="fas fa-plus"></i> Add Student</button>
+                </div>
+                <div class="table-card">
+                    <table class="data-table" id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Enrollment No.</th>
+                                <th>Photo</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Mobile Number</th>
+                                <th>City</th>
+                                <th>Gender</th>
+                                <th>Semester</th>
+                                <th>Section</th>
+                                <th>Course</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Courses Panel -->
+            <section class="panel" id="section-courses" style="display:none;">
+                <div class="panel-header">
+                    <h2 class="section-title">Courses</h2>
+                    <button id="addCourseBtn" class="btn-primary"><i class="fas fa-plus"></i> Add Course</button>
+                </div>
+                <div class="table-card">
+                    <table class="data-table" id="coursesTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Duration</th>
+                                <th>Since</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Teachers Panel -->
+            <section class="panel" id="section-teachers" style="display:none;">
+                <div class="panel-header">
+                    <h2 class="section-title">Teachers</h2>
+                    <button id="addTeacherBtn" class="btn-primary"><i class="fas fa-plus"></i> Add Teacher</button>
+                </div>
+                <div class="table-card">
+                    <table class="data-table" id="teachersTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Photo</th>
+                                <th>Sem</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modalOverlay" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <button class="modal-close"><i class="fas fa-times"></i></button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="departmentAdmin-dashboard.js"></script>
+</body>
+
+</html>

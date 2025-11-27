@@ -65,7 +65,7 @@
                     <div class="form-group">
                         <label for="hodPassword">Password</label>
                         <input type="password" id="hodPassword" name="password" placeholder="Enter your password"
-                            required>
+                            required minlength="6" title="Password must be at least 6 characters">
                     </div>
                     <button type="submit" class="btn btn-secondary w-full">Login as HOD</button>
                 </form>
@@ -80,10 +80,18 @@
                     <div class="form-group">
                         <label for="adminPassword">Password</label>
                         <input type="password" id="adminPassword" name="password" placeholder="Enter your password"
-                            required>
+                            required minlength="6" title="Password must be at least 6 characters">
                     </div>
                     <button type="submit" class="btn btn-secondary w-full">Login as Admin</button>
                 </form>
+
+                <!-- Site Admin Link -->
+                <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                    <p style="color: var(--gray-600); margin-bottom: 0.5rem;">Site Administrator?</p>
+                    <a href="admin-login.html" style="color: var(--primary); text-decoration: none; font-weight: 500;">
+                        <i class="fas fa-shield-alt"></i> Site Admin Login
+                    </a>
+                </div>
             </div>
 
         </section>
@@ -180,9 +188,21 @@
                         return;
                     }
                 } else if (userType === 'admin') {
-                    payload = { email: $('#adminEmail').val(), password: $('#adminPassword').val() };
+                    const adminPwd = ($('#adminPassword').val() || '').trim();
+                    if (!adminPwd || adminPwd.length < 6) {
+                        $('#loginError').text('Admin password must be at least 6 characters').show();
+                        $btn.removeClass('loading').prop('disabled', false);
+                        return;
+                    }
+                    payload = { email: $('#adminEmail').val(), password: adminPwd };
                 } else if (userType === 'hod') {
-                    payload = { email: $('#hodEmail').val(), password: $('#hodPassword').val() };
+                    const hodPwd = ($('#hodPassword').val() || '').trim();
+                    if (!hodPwd || hodPwd.length < 6) {
+                        $('#loginError').text('HOD password must be at least 6 characters').show();
+                        $btn.removeClass('loading').prop('disabled', false);
+                        return;
+                    }
+                    payload = { email: $('#hodEmail').val(), password: hodPwd };
                 }
 
                 // Call backend per role
@@ -225,11 +245,15 @@
                                 return; // Stop execution - don't redirect
                             }
 
-                            console.log('JWT Payload:', jwtPayload);
+
 
                             // Store token and JWT payload based on user type
                             if (userType === 'student') {
                                 localStorage.setItem('rmc_token', token);
+                                // Ensure selected collegeId is persisted in stored student object for later checks
+                                if (payload && payload.collegeId) {
+                                    jwtPayload.collegeId = payload.collegeId;
+                                }
                                 localStorage.setItem('rmc_user', JSON.stringify(jwtPayload));
                                 console.log('Student data stored from JWT:', jwtPayload);
                             } else if (userType === 'hod') {
@@ -246,7 +270,7 @@
                             if (userType === 'student') {
                                 window.location.href = 'profile.html';
                             } else if (userType === 'hod') {
-                                window.location.href = 'admin-dashboard.html';
+                                window.location.href = 'departmentAdmin-dashboard.html';
                             } else if (userType === 'admin') {
                                 window.location.href = 'college-admin-dashboard.html';
                             } else {

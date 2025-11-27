@@ -12,7 +12,8 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="common.css">
-    <link rel="stylesheet" href="admin-dashboard.css">
+    <link rel="stylesheet" href="departmentAdmin-dashboard.css">
+    <link rel="stylesheet" href="college-admin-dashboard.css">
 
     <!-- jQuery & API -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -93,45 +94,67 @@
                             <i class="fas fa-edit"></i> Edit
                         </button>
                     </div>
+
+                    <!-- College Image -->
+                    <div class="info-row" style="text-align: center; padding: 1rem 0;">
+                        <div style="position: relative; display: inline-block;">
+                            <img id="collegeImageDisplay" src="" alt="College"
+                                style="max-width: 300px; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: none;">
+                            <button id="editCollegeImageBtn" class="photo-edit"
+                                style="position: absolute; bottom: 10px; right: 10px; background: var(--primary); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); display: none;">
+                                <i class="fas fa-camera" style="font-size: 18px;"></i>
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="info-row">
                         <span class="label">College Name</span>
                         <p id="collegeNameDisplay">--</p>
                     </div>
                     <div class="info-row">
-                        <span class="label">Short Description</span>
+                        <span class="label">College Type</span>
+                        <p id="collegeTypeDisplay">--</p>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Description</span>
                         <p id="collegeDescDisplay">--</p>
                     </div>
                     <div class="info-row">
-                        <span class="label">Full Address</span>
+                        <span class="label">Address</span>
                         <p id="collegeAddressDisplay">--</p>
                     </div>
                     <div class="info-row">
-                        <span class="label">City</span>
-                        <p id="collegeCityDisplay">--</p>
+                        <span class="label">Email</span>
+                        <p id="collegeEmailDisplay">--</p>
                     </div>
                     <div class="info-row">
-                        <span class="label">State</span>
-                        <p id="collegeStateDisplay">--</p>
+                        <span class="label">Phone</span>
+                        <p id="collegePhoneDisplay">--</p>
                     </div>
                     <div class="info-row">
-                        <span class="label">Pincode</span>
-                        <p id="collegePincodeDisplay">--</p>
+                        <span class="label">Website</span>
+                        <p id="collegeWebsiteDisplay">--</p>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Activity</span>
+                        <p id="collegeActivityDisplay">--</p>
                     </div>
                 </div>
             </section>
 
             <!-- Departments Panel -->
             <section class="panel" id="section-departments" style="display:none;">
-                <div class="section-header">
+                <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
                     <h2 class="section-title">Departments</h2>
-                    <button id="addDepartmentBtn" class="btn-primary"><i class="fas fa-plus"></i> Add
-                        Department</button>
+                    <div style="margin-left:auto">
+                        <button id="addDepartmentBtn" class="btn-primary"><i class="fas fa-plus"></i> Add
+                            Department</button>
+                    </div>
                 </div>
                 <table id="departmentsTable" class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Logo</th>
                             <th>Name</th>
                             <th>Description</th>
                             <th>Actions</th>
@@ -147,25 +170,28 @@
 
             <!-- HODs Panel -->
             <section class="panel" id="section-hods" style="display:none;">
-                <div class="section-header">
+                <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
                     <h2 class="section-title">Department Admins (HODs)</h2>
-                    <button id="addHodBtn" class="btn-primary"><i class="fas fa-plus"></i> Add HOD</button>
+                    <div style="margin-left:auto">
+                        <button id="addHodBtn" class="btn-primary"><i class="fas fa-plus"></i> Add HOD</button>
+                    </div>
                 </div>
                 <table id="hodsTable" class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Username</th>
                             <th>Photo</th>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Mobile</th>
+                            <th>Password</th>
                             <th>Department</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td colspan="7">Loading...</td>
+                            <td colspan="8">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -175,9 +201,9 @@
     </div>
 
     <!-- Modal Overlay -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-box">
-            <span class="modal-close">&times;</span>
+    <div id="modalOverlay" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <button class="modal-close"><i class="fas fa-times"></i></button>
             <div id="modalBody"></div>
         </div>
     </div>

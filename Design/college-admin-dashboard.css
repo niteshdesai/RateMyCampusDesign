@@ -1,0 +1,37 @@
+/* -------------------------------------------------
+    college-admin-dashboard.css – Uses Same Style as Department Admin Dashboard
+   ------------------------------------------------- */
+
+/* This file inherits all styles from departmentAdmin-dashboard.css */
+/* Only minimal customizations specific to college admin */
+
+/* College Image Display in Overview */
+.college-image-container {
+    text-align: center;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+}
+
+#collegeImageDisplay {
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: var(--radius, 0.75rem);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+}
+
+/* Current Image Preview in Edit Modal */
+.current-image-preview {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #collegeImageDisplay {
+        max-height: 200px;
+    }
+}
